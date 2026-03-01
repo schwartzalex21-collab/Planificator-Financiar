@@ -701,8 +701,19 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 12px;
-            flex-shrink: 0;
+            border-radius: 8px;
+        }
+
+        .ai-text {
+            flex: 1;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .ai-text h4 {
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 4px;
         }
 
         .allocator-bar {
@@ -717,6 +728,135 @@
         .allocator-fill {
             height: 100%;
             transition: width 0.5s ease;
+        }
+
+        /* Security & Blur */
+        .app-blur {
+            filter: blur(12px) grayscale(50%);
+            pointer-events: none;
+            user-select: none;
+            transition: filter 0.3s ease;
+        }
+
+        .pin-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .pin-dots {
+            display: flex;
+            gap: 16px;
+            margin: 40px 0;
+        }
+
+        .pin-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            transition: all 0.2s;
+        }
+
+        .pin-dot.filled {
+            background: var(--gold);
+            box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+        }
+
+        .pin-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            padding: 20px;
+        }
+
+        .pin-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-dim);
+            color: var(--white);
+            font-size: 28px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .pin-btn:active {
+            background: rgba(243, 156, 18, 0.2);
+        }
+
+        .pin-btn.action-btn {
+            background: transparent;
+            border: none;
+            color: var(--gold);
+            font-size: 16px;
+            font-family: var(--font-body);
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 16px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .calendar-day {
+            padding: 8px 0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--gray);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .calendar-day:active {
+            opacity: 0.7;
+        }
+
+        .calendar-day.active {
+            background: var(--gold);
+            color: var(--bg-dark);
+            font-weight: bold;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.has-expense::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+
+        .calendar-day.active.has-expense::after {
+            background: var(--bg-dark);
+        }
+
+        .calendar-day.pad {
+            background: transparent;
+            cursor: default;
         }
 
         .modal-sheet {
@@ -943,8 +1083,8 @@
             { id: 'vacante', icon: 'Plane', name: 'Vacanțe & Timp Liber' },
             { id: 'copii', icon: 'Baby', name: 'Copii & Familie' },
             { id: 'economii', icon: 'PiggyBank', name: 'Economii & Investiții' },
-            { id: 'vicii', icon: 'Coffee', name: 'Cafea & Diverse' },
-            { id: 'altele', icon: 'HelpCircle', name: 'Altele' }
+            { id: 'altele', name: 'Altele', icon: 'MoreHorizontal', color: '#95A5A6' },
+            { id: 'factura_recurenta', name: 'Factură/Rată', icon: 'Repeat', color: '#8E44AD' }
         ];
 
         // Bugete specifice pieței din România
@@ -982,6 +1122,19 @@
             const [isAddSubOpen, setIsAddSubOpen] = useState(false);
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
+            const fileInputRef = useRef(null);
+
+            // Cycle & Calendar
+            const [payday, setPayday] = useState(1);
+            const [selectedDate, setSelectedDate] = useState(new Date());
+
+            // Security & Privacy
+            const [savedPin, setSavedPin] = useState(null);
+            const [isLocked, setIsLocked] = useState(false);
+            const [pinInput, setPinInput] = useState('');
+            const [isSettingPin, setIsSettingPin] = useState(false);
+            const [tempPin, setTempPin] = useState('');
+            const [isBlurred, setIsBlurred] = useState(false);
 
             // Notifications Note: HTML5 Notifications API require HTTPS and explicit user permissions. 
             // Since this runs offline, push notifications aren't natively reliable without a registered ServiceWorker.
@@ -1003,6 +1156,26 @@
                 // Set daily quote
                 setDailyQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
 
+                // Security Init & Privacy Blur
+                const storedPin = window.localStorage ? window.localStorage.getItem('IAI_Planner_PIN') : null;
+                if (storedPin) {
+                    setSavedPin(storedPin);
+                    setIsLocked(true);
+                }
+
+                const storedPayday = window.localStorage ? window.localStorage.getItem('IAI_Planner_Payday') : null;
+                if (storedPayday) setPayday(parseInt(storedPayday));
+
+                const handleVisibilityChange = () => {
+                    if (document.hidden) {
+                        setIsBlurred(true);
+                        // Optional: if backgrounded for more than X mins, re-lock app (setIsLocked(true) if savedPin).
+                    } else {
+                        setIsBlurred(false);
+                    }
+                };
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+
                 // Load local storage
                 try {
                     const saved = window.localStorage ? window.localStorage.getItem('IAI_Planner_V2') : null;
@@ -1018,6 +1191,8 @@
                 } catch (e) {
                     console.error('LocalStorage unavailable', e);
                 }
+
+                return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
             }, []);
 
             // Month Data Load
@@ -1027,6 +1202,18 @@
                 setIncome(monthData.income || '');
                 setExpenses(monthData.expenses || []);
             }, [currentMonth, dataStore]);
+
+            const getCycleBounds = (date, pDay) => {
+                const d = new Date(date);
+                d.setHours(0, 0, 0, 0);
+                let start = new Date(d.getFullYear(), d.getMonth(), pDay);
+                if (d.getDate() < pDay) {
+                    start = new Date(d.getFullYear(), d.getMonth() - 1, pDay);
+                }
+                const end = new Date(start.getFullYear(), start.getMonth() + 1, pDay - 1);
+                end.setHours(23, 59, 59, 999);
+                return { start, end };
+            };
 
             const saveState = (inc, exps) => {
                 const mKey = getMonthKey(currentMonth);
@@ -1062,6 +1249,73 @@
             const [newExpenseName, setNewExpenseName] = useState('');
             const [newExpenseAmount, setNewExpenseAmount] = useState('');
             const [newExpenseCat, setNewExpenseCat] = useState('supermarket');
+            const [newExpenseDate, setNewExpenseDate] = useState(''); // Allows past days
+
+            // --- SMART AUTOCOMPLETE ---
+            useEffect(() => {
+                if (newExpenseName.trim().length > 2) {
+                    const searchName = newExpenseName.trim().toLowerCase();
+                    // Căutare în istoricul global
+                    let foundCat = null;
+                    Object.values(dataStore).forEach(monthData => {
+                        const exps = monthData.expenses || [];
+                        const match = exps.find(e => e.name.toLowerCase() === searchName);
+                        if (match && !foundCat) {
+                            foundCat = match.categoryId;
+                        }
+                    });
+                    if (foundCat) {
+                        setNewExpenseCat(foundCat);
+                    }
+                }
+            }, [newExpenseName, dataStore]);
+
+            // --- AUTO-LOGGING RECURENȚE ---
+            useEffect(() => {
+                const mKey = getMonthKey(currentMonth);
+                const monthData = dataStore[mKey];
+
+                // Trage la început de lună automat dacă există venit setat și recurențe active
+                if (monthData && monthData.income && subs.length > 0 && !monthData.subsAdded) {
+                    let newExps = [...(monthData.expenses || [])];
+                    let addedAny = false;
+
+                    subs.forEach(sub => {
+                        const alreadyExists = newExps.some(e => e.name === sub.name && e.amount === sub.amount);
+                        if (!alreadyExists) {
+                            newExps.push({
+                                id: Date.now() + Math.random(), // Unique ID
+                                name: sub.name,
+                                amount: parseFloat(sub.amount),
+                                categoryId: 'factura_recurenta', // Specific internal tag or just 'altele'
+                                date: new Date().toISOString(),
+                                isAuto: true
+                            });
+                            addedAny = true;
+                        }
+                    });
+
+                    newExps.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    // Marhează luna asta ca având recurențele aplicate
+                    const newDataStore = { ...dataStore, [mKey]: { ...monthData, expenses: newExps, subsAdded: true } };
+                    setDataStore(newDataStore);
+                    setExpenses(newExps);
+
+                    if (window.localStorage) {
+                        const existingSaved = window.localStorage.getItem('IAI_Planner_V2');
+                        if (existingSaved) {
+                            const parsed = JSON.parse(existingSaved);
+                            parsed.dataStore = newDataStore;
+                            window.localStorage.setItem('IAI_Planner_V2', JSON.stringify(parsed));
+                        }
+                    }
+
+                    if (addedAny) {
+                        setTimeout(() => showToast('Costurile fixe pe luna asta au fost extrase automat!', 'info'), 1500);
+                    }
+                }
+            }, [currentMonth, dataStore, subs]);
 
             const handleIncomeChange = (val) => {
                 setIncome(val);
@@ -1076,23 +1330,42 @@
                 }
 
                 const amount = parseFloat(newExpenseAmount);
+                const activeDateString = newExpenseDate ? new Date(newExpenseDate).toISOString() : new Date().toISOString();
+
                 const expenseItem = {
                     id: Date.now(),
                     name: newExpenseName,
                     amount: amount,
                     categoryId: newExpenseCat,
-                    date: new Date().toISOString()
+                    date: activeDateString,
+                    isManualDate: !!newExpenseDate
                 };
 
-                const updatedList = [expenseItem, ...expenses];
-                setExpenses(updatedList);
-                saveState(income, updatedList);
+                const targetMKey = getMonthKey(new Date(activeDateString));
+
+                if (targetMKey === getMonthKey(currentMonth)) {
+                    const updatedList = [expenseItem, ...expenses];
+                    setExpenses(updatedList);
+                    saveState(income, updatedList);
+                } else {
+                    const targetMonthData = dataStore[targetMKey] || { income: '', expenses: [] };
+                    const updatedTargetExps = [expenseItem, ...(targetMonthData.expenses || [])];
+                    const newDataStore = { ...dataStore, [targetMKey]: { ...targetMonthData, expenses: updatedTargetExps } };
+                    setDataStore(newDataStore);
+                    if (window.localStorage) {
+                        const existingSaved = window.localStorage.getItem('IAI_Planner_V2');
+                        const parsed = existingSaved ? JSON.parse(existingSaved) : { subs: [], dataStore: {} }; // Ensure dataStore exists
+                        parsed.dataStore = newDataStore;
+                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify(parsed));
+                    }
+                }
 
                 setNewExpenseName('');
                 setNewExpenseAmount('');
                 setNewExpenseCat('supermarket');
+                setNewExpenseDate('');
                 setIsAddModalOpen(false);
-                showToast('Adăugat cu succes!', 'success');
+                showToast('Pagina a salvat detaliile cu succes!', 'success');
             };
 
             const [newSubName, setNewSubName] = useState('');
@@ -1235,8 +1508,156 @@
                 setOpenHelpIndex(prevIndex => prevIndex === index ? null : index);
             };
 
+            // --- SECURITY AND DATA BACKUP ACTIONS ---
+            const handlePinPress = (digit) => {
+                if (pinInput.length < 4) {
+                    const newPin = pinInput + digit;
+                    setPinInput(newPin);
+
+                    if (newPin.length === 4) {
+                        setTimeout(() => {
+                            if (isSettingPin) {
+                                if (!tempPin) {
+                                    setTempPin(newPin);
+                                    setPinInput('');
+                                    showToast('Confirmă noul cod PIN', 'info');
+                                } else {
+                                    if (newPin === tempPin) {
+                                        window.localStorage.setItem('IAI_Planner_PIN', newPin);
+                                        setSavedPin(newPin);
+                                        setIsSettingPin(false);
+                                        setTempPin('');
+                                        setPinInput('');
+                                        showToast('Cod PIN securizat cu succes!', 'success');
+                                    } else {
+                                        showToast('Codurile nu coincid! Încearcă din nou.', 'danger');
+                                        setTempPin('');
+                                        setPinInput('');
+                                    }
+                                }
+                            } else {
+                                if (newPin === savedPin) {
+                                    setIsLocked(false);
+                                    setPinInput('');
+                                } else {
+                                    showToast('PIN Incorect!', 'danger');
+                                    setPinInput('');
+                                }
+                            }
+                        }, 250);
+                    }
+                }
+            };
+
+            const removePin = () => {
+                if (confirm('Sigur vrei să elimini protecția cu cod PIN?')) {
+                    window.localStorage.removeItem('IAI_Planner_PIN');
+                    setSavedPin(null);
+                    showToast('Cod PIN eliminat.', 'info');
+                }
+            };
+
+            const handleExportJson = () => {
+                try {
+                    const data = window.localStorage.getItem('IAI_Planner_V2');
+                    if (!data) return showToast('Nu există date pentru export.', 'warning');
+
+                    const blob = new Blob([data], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `MoneyPlanner_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('Backup salvat cu succes!', 'success');
+                } catch (e) {
+                    showToast('Eroare la exportul datelor.', 'danger');
+                }
+            };
+
+            const handleImportJson = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const content = event.target.result;
+                        JSON.parse(content); // Validare JSON
+                        window.localStorage.setItem('IAI_Planner_V2', content);
+                        showToast('Restaurare reușită! Se reîncarcă datele...', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } catch (err) {
+                        showToast('Fișier invalid sau corupt!', 'danger');
+                    }
+                };
+                reader.readAsText(file);
+                // Reset file input
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            };
+
+            // PIN screen override
+            if (isLocked || isSettingPin) {
+                return (
+                    <div className="pin-screen">
+                        {toast && <div className={`toast toast-${toast.type}`} style={{ top: '40px' }}>{toast.message}</div>}
+                        <Icon name={isSettingPin ? "ShieldPlus" : "Lock"} className="lucide-xl" style={{ color: 'var(--gold)', marginBottom: '24px', width: '48px', height: '48px' }} />
+                        <h2 style={{ color: 'var(--white)', fontSize: '24px', fontWeight: 'bold' }}>Money Planner</h2>
+                        <p style={{ color: 'var(--gray)', marginTop: '8px' }}>
+                            {isSettingPin ? (tempPin ? 'Confirmă noul PIN' : 'Crează un cod PIN de 4 cifre') : 'Introduceți codul PIN de siguranță'}
+                        </p>
+
+                        <div className="pin-dots">
+                            {[0, 1, 2, 3].map(i => (
+                                <div key={i} className={`pin-dot ${pinInput.length > i ? 'filled' : ''}`}></div>
+                            ))}
+                        </div>
+
+                        <div className="pin-pad">
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                                <button key={num} className="pin-btn" onClick={() => handlePinPress(num.toString())}>{num}</button>
+                            ))}
+                            {isSettingPin ? (
+                                <button className="pin-btn action-btn" onClick={() => { setIsSettingPin(false); setPinInput(''); setTempPin(''); }}>Anul.<br />Setare</button>
+                            ) : <div></div>}
+                            <button className="pin-btn" onClick={() => handlePinPress('0')}>0</button>
+                            <button className="pin-btn action-btn" onClick={() => setPinInput(pinInput.slice(0, -1))}><Icon name="Delete" /></button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // CALENDAR VARS
+            const { start: cycleStart, end: cycleEnd } = getCycleBounds(selectedDate, payday);
+            const mKey1 = getMonthKey(cycleStart);
+            const mKey2 = getMonthKey(cycleEnd);
+
+            let cycleExps = [];
+            if (dataStore[mKey1]?.expenses) cycleExps.push(...dataStore[mKey1].expenses);
+            if (mKey1 !== mKey2 && dataStore[mKey2]?.expenses) cycleExps.push(...dataStore[mKey2].expenses);
+            cycleExps = cycleExps.filter(e => new Date(e.date) >= cycleStart && new Date(e.date) <= cycleEnd);
+
+            const selectedStr = selectedDate.toISOString().split('T')[0];
+            const dayExps = cycleExps.filter(e => e.date.startsWith(selectedStr));
+            const dayTotal = dayExps.reduce((s, e) => s + e.amount, 0);
+
+            const spentBefore = cycleExps.filter(e => new Date(e.date) >= cycleStart && new Date(e.date) < new Date(selectedDate).setHours(0, 0, 0, 0)).reduce((s, e) => s + e.amount, 0);
+            const cycleIncome = parseFloat(dataStore[mKey1]?.income || 0);
+            const totalFixed = subs.reduce((s, x) => s + x.amount, 0);
+            const budgetAtStartOfDay = cycleIncome - totalFixed - spentBefore;
+
+            const daysLeftInCycle = Math.ceil((cycleEnd - new Date(selectedDate).setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
+            const activeDailyBudget = daysLeftInCycle > 0 && budgetAtStartOfDay > 0 ? (budgetAtStartOfDay / daysLeftInCycle).toFixed(0) : 0;
+            const cycleDaysArr = [];
+            let currD = new Date(cycleStart);
+            while (currD <= cycleEnd) {
+                cycleDaysArr.push(new Date(currD));
+                currD.setDate(currD.getDate() + 1);
+            }
+
             return (
-                <div className="app-container">
+                <div className={`app-container ${isBlurred ? 'app-blur' : ''}`}>
                     {/* Toasts */}
                     {toast && (
                         <div className={`toast toast-${toast.type}`}>
@@ -1384,6 +1805,106 @@
                                     </div>
                                 );
                             })}
+                        </div>
+                    )}
+
+                    {activeTab === 'calendar' && (
+                        <div className="content-section fade-in">
+                            <div className="section-title">
+                                Ciclu Salarial ({cycleStart.getDate()} {formatMonthInfo(cycleStart).split(' ')[0]} - {cycleEnd.getDate()} {formatMonthInfo(cycleEnd).split(' ')[0]})
+                            </div>
+
+                            <div className="card">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <button className="btn-outline" onClick={() => { const d = new Date(selectedDate); d.setMonth(d.getMonth() - 1); setSelectedDate(d); }}><Icon name="ChevronLeft" className="lucide-sm" /></button>
+                                    <div style={{ fontWeight: 'bold' }}>{formatMonthInfo(selectedDate)}</div>
+                                    <button className="btn-outline" onClick={() => { const d = new Date(selectedDate); d.setMonth(d.getMonth() + 1); setSelectedDate(d); }}><Icon name="ChevronRight" className="lucide-sm" /></button>
+                                </div>
+
+                                <div className="calendar-grid">
+                                    {['Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ', 'Du'].map(day => <div key={day} style={{ color: 'var(--dgray)', fontSize: '12px' }}>{day}</div>)}
+
+                                    {/* Padding offset */}
+                                    {Array.from({ length: (cycleStart.getDay() === 0 ? 6 : cycleStart.getDay() - 1) }).map((_, i) => <div key={`pad-${i}`} className="calendar-day pad" />)}
+
+                                    {cycleDaysArr.map(d => {
+                                        const dStr = d.toISOString().split('T')[0];
+                                        const hasExp = cycleExps.some(e => e.date.startsWith(dStr));
+                                        const isActive = dStr === selectedStr;
+                                        return (
+                                            <div
+                                                key={dStr}
+                                                className={`calendar-day ${isActive ? 'active' : ''} ${hasExp ? 'has-expense' : ''}`}
+                                                onClick={() => setSelectedDate(d)}
+                                            >
+                                                {d.getDate()}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="section-title" style={{ marginTop: '24px' }}>
+                                <Icon name="Target" className="lucide-sm" style={{ color: 'var(--gold)', marginRight: '6px' }} />
+                                Buget pe {selectedDate.getDate()} {formatMonthInfo(selectedDate).split(' ')[0]}
+                            </div>
+                            <div className={`daily-intel ${budgetAtStartOfDay <= 0 ? 'intel-danger' : ''}`}>
+                                <div className="intel-text" style={{ flex: 1 }}>
+                                    {budgetAtStartOfDay > 0 ? (
+                                        <p><span className="amount">{activeDailyBudget} RON</span> disponibil azi.</p>
+                                    ) : (
+                                        <p style={{ fontSize: '14px', color: 'var(--danger)', fontWeight: '600' }}>Buget epuizat în acest ciclu!</p>
+                                    )}
+                                    <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--gray)', display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>Cheltuit azi:</span>
+                                        <span style={{ color: dayTotal > 0 ? 'var(--danger)' : 'var(--emerald)', fontWeight: 'bold' }}>{dayTotal > 0 ? `-${dayTotal.toFixed(0)}` : '0'} RON</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="section-title" style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                Istoric pe Data Selectată
+                                <button className="btn-outline" onClick={() => {
+                                    setNewExpenseDate(selectedStr);
+                                    setIsAddModalOpen(true);
+                                }} style={{ border: 'none', color: 'var(--gold)', padding: 0 }}> + Adaugă Pe Azi</button>
+                            </div>
+
+                            <div className="card" style={{ padding: 0 }}>
+                                {dayExps.length > 0 ? dayExps.map(exp => {
+                                    const cat = CATEGORIES_DEFAULT.find(c => c.id === exp.categoryId) || CATEGORIES_DEFAULT[CATEGORIES_DEFAULT.length - 1];
+                                    return (
+                                        <div className="list-item" key={exp.id} style={{ borderBottom: '1px solid var(--border-dim)', borderRadius: 0, margin: 0 }}>
+                                            <div className="item-icon"><Icon name={cat.icon} /></div>
+                                            <div className="item-details">
+                                                <div className="item-title">{exp.name}</div>
+                                                <div className="item-subtitle">{cat.name}</div>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div className="item-amount expense">-{exp.amount.toFixed(0)} RON</div>
+                                                <span onClick={() => {
+                                                    // Standard Delete
+                                                    const updatedList = expenses.filter(e => e.id !== exp.id);
+                                                    setExpenses(updatedList);
+                                                    saveState(income, updatedList);
+                                                    // Ensure global localStorage gets updated if cross-month
+                                                    const tKey = getMonthKey(new Date(exp.date));
+                                                    if (tKey !== getMonthKey(currentMonth)) {
+                                                        const mt = dataStore[tKey] || { income: '', expenses: [] };
+                                                        const ds = { ...dataStore, [tKey]: { ...mt, expenses: mt.expenses.filter(e => e.id !== exp.id) } };
+                                                        setDataStore(ds);
+                                                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify({ dataStore: ds, subs }));
+                                                    }
+                                                }} style={{ color: 'var(--danger)', fontSize: '12px', cursor: 'pointer' }}>Șterge</span>
+                                            </div>
+                                        </div>
+                                    );
+                                }) : (
+                                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--gray)', fontSize: '13px' }}>
+                                        Nicio cheltuială salvată în această zi. <br />Banii tăi sunt la loc sigur!
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -1561,6 +2082,56 @@
                                 </div>
                             </div>
 
+                            <div className="section-title" style={{ marginTop: '30px' }}>Securitate & Backup (Offline)</div>
+                            <div className="card">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid var(--border-dim)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ background: 'rgba(243, 156, 18, 0.1)', padding: '10px', borderRadius: '12px' }}>
+                                            <Icon name="Shield" style={{ color: 'var(--gold)' }} />
+                                        </div>
+                                        <div>
+                                            <div style={{ color: 'var(--white)', fontWeight: 'bold', fontSize: '15px' }}>Protecție Cod PIN</div>
+                                            <div style={{ color: 'var(--gray)', fontSize: '12px', marginTop: '2px' }}>Blochează accesul în aplicație</div>
+                                        </div>
+                                    </div>
+                                    {savedPin ? (
+                                        <button className="btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={removePin}>Elimină</button>
+                                    ) : (
+                                        <button className="btn-outline" onClick={() => setIsSettingPin(true)}>Configurează</button>
+                                    )}
+                                </div>
+
+                                <div style={{ marginBottom: '8px' }}>
+                                    <h4 style={{ color: 'var(--white)', fontSize: '14px', marginBottom: '8px' }}>Salvare și Restaurare Date</h4>
+                                    <p style={{ fontSize: '13px', color: 'var(--gray)', marginBottom: '16px', lineHeight: '1.4' }}>
+                                        Banii și cheltuielile tale nu ajung pe servere. Descarcă periodic o copie de siguranță pentru a o păstra în Cloud (iCloud/Drive) sau dacă îți schimbi telefonul.
+                                    </p>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                        <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={handleExportJson}>
+                                            <Icon name="DownloadCloud" className="lucide-sm" /> Exportă (.json)
+                                        </button>
+                                        <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => fileInputRef.current && fileInputRef.current.click()}>
+                                            <Icon name="UploadCloud" className="lucide-sm" /> Importă (.json)
+                                        </button>
+                                        <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".json" onChange={handleImportJson} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="section-title" style={{ marginTop: '30px' }}>Setări Ciclu Bugetar</div>
+                            <div className="card">
+                                <label style={{ fontSize: '14px', color: 'var(--white)', fontWeight: 'bold' }}>Ziua ta de Salariu</label>
+                                <select value={payday} onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    setPayday(val);
+                                    window.localStorage.setItem('IAI_Planner_Payday', val);
+                                    showToast('Ziua de resetare salvată!', 'success');
+                                }} style={{ width: '100%', padding: '12px', marginTop: '10px', background: 'var(--bg-dark)', color: 'var(--white)', border: '1px solid var(--border-dim)', borderRadius: '8px' }}>
+                                    {[...Array(28)].map((_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
+                                </select>
+                                <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '8px' }}>Selectează data în care primești banii. Calendarul va re-calcula bugetul tău zilnic luând în calcul zilele dintre salariul luna curentă și cel din luna viitoare.</p>
+                            </div>
+
                             <div className="section-title" style={{ marginTop: '30px' }}>Gestiune Date Locale</div>
                             <div className="card">
                                 <p style={{ fontSize: '13px', color: 'var(--dgray)', marginBottom: '16px' }}>Datele financiare sunt păstrate 100% Offline în memoria internă a telefonului tău (localStorage). Nu ai cont, nu ai parolă, nu le putem vedea pe server. Privacidade Maximă.</p>
@@ -1582,9 +2153,10 @@
                             <Icon name="LayoutDashboard" />
                             <span className="nav-label">Acasă</span>
                         </div>
-                        <div className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
-                            <Icon name="ListOrdered" />
-                            <span className="nav-label">Istoric</span>
+
+                        <div className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>
+                            <Icon name="CalendarDays" />
+                            <span className="nav-label">Calendar</span>
                         </div>
 
                         <div style={{ width: '60px' }}></div>
@@ -1650,6 +2222,11 @@
                                                 ))}
                                             </select>
                                         </div>
+                                    </div>
+
+                                    <div className="form-group" style={{ marginTop: '20px' }}>
+                                        <label>Modificare Dată (Opțional)</label>
+                                        <input type="date" value={newExpenseDate} onChange={e => setNewExpenseDate(e.target.value)} style={{ padding: '12px', background: 'var(--bg-dark)', color: 'var(--gray)', border: '1px solid var(--border-dim)', borderRadius: '8px', width: '100%', fontFamily: 'var(--font-mono)' }} />
                                     </div>
 
                                     <button type="submit" className="btn btn-primary" style={{ marginTop: '20px' }}>
