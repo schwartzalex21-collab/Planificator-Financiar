@@ -834,12 +834,13 @@
                         svg.setAttribute('stroke-linejoin', 'round');
                         svg.setAttribute('class', className);
 
-                        if (iconData[2] && Array.isArray(iconData[2])) {
-                            iconData[2].forEach(child => {
-                                if (child && child[0]) {
+                        if (Array.isArray(iconData)) {
+                            iconData.forEach(child => {
+                                if (Array.isArray(child) && child.length >= 2) {
                                     const el = document.createElementNS('http://www.w3.org/2000/svg', child[0]);
-                                    if (child[1]) {
-                                        Object.keys(child[1]).forEach(attr => el.setAttribute(attr, child[1][attr]));
+                                    const attrs = child[1];
+                                    if (typeof attrs === 'object' && attrs !== null) {
+                                        Object.keys(attrs).forEach(attr => el.setAttribute(attr, attrs[attr]));
                                     }
                                     svg.appendChild(el);
                                 }
