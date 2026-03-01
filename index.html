@@ -1417,8 +1417,40 @@
             );
         }
 
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+
+            componentDidCatch(error, errorInfo) {
+                console.error("React Error Caught:", error, errorInfo);
+            }
+
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div style={{ padding: '40px 20px', textAlign: 'center', color: 'white', fontFamily: 'sans-serif', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                            <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#ff4d4d', marginBottom: '20px' }}>Eroare Interfață</div>
+                            <h2 style={{ marginBottom: '10px' }}>A apărut o eroare neașteptată pe acest dispozitiv.</h2>
+                            <p style={{ color: '#BDC3C7', fontSize: '14px', maxWidth: '320px', marginTop: '10px', background: 'rgba(0,0,0,0.5)', padding: '15px', borderRadius: '8px', fontFamily: 'monospace', textAlign: 'left', wordBreak: 'break-all' }}>
+                                {this.state.error?.toString()}
+                            </p>
+                            <button onClick={() => window.location.reload()} style={{ marginTop: '30px', background: '#F39C12', color: 'black', border: 'none', padding: '12px 24px', borderRadius: '50px', fontWeight: 'bold', fontSize: '16px' }}>Reîncarcă Aplicația</button>
+                        </div>
+                    );
+                }
+
+                return this.props.children;
+            }
+        }
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        root.render(<ErrorBoundary><App /></ErrorBoundary>);
     </script>
 </body>
 
