@@ -644,6 +644,81 @@
             animation: fadeIn 0.3s;
         }
 
+        /* Help & Accordion CSS */
+        .help-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-dim);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .help-header {
+            padding: 16px;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .help-body {
+            padding: 0 16px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: var(--gray);
+            line-height: 1.5;
+        }
+
+        .help-body.open {
+            padding: 0 16px 16px 16px;
+            max-height: 500px;
+        }
+
+        /* AI Offline CSS */
+        .ai-card {
+            background: linear-gradient(145deg, rgba(52, 152, 219, 0.15), rgba(41, 128, 185, 0.05));
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-left: 3px solid #3498DB;
+            padding: 16px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .ai-icon {
+            color: #3498DB;
+            background: rgba(0, 0, 0, 0.3);
+            width: 42px;
+            height: 42px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .allocator-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .allocator-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
         .modal-sheet {
             background: var(--bg);
             width: 100%;
@@ -852,7 +927,7 @@
                 }
             }, [name, className]);
 
-            return <i ref={iconRef} style={{ display: 'inline-flex', ...style }}></i>;
+            return <i ref={iconRef} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', ...style }}></i>;
         };
 
         // Categorii Premium
@@ -897,12 +972,14 @@
             // Data State
             const [income, setIncome] = useState('');
             const [expenses, setExpenses] = useState([]);
+            const [subs, setSubs] = useState([]); // Subscriptions
             const [dataStore, setDataStore] = useState({});
 
             // Features
             const [dailyQuote, setDailyQuote] = useState('');
             const [toast, setToast] = useState(null);
             const [openHelpIndex, setOpenHelpIndex] = useState(null);
+            const [isAddSubOpen, setIsAddSubOpen] = useState(false);
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
 
@@ -933,6 +1010,7 @@
                         try {
                             const parsed = JSON.parse(saved);
                             setDataStore(parsed.dataStore || {});
+                            if (parsed.subs) setSubs(parsed.subs);
                         } catch (e) {
                             console.error('Error loading data', e);
                         }
@@ -956,10 +1034,27 @@
                 setDataStore(newDataStore);
                 try {
                     if (window.localStorage) {
-                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify({ dataStore: newDataStore }));
+                        const existingSaved = window.localStorage.getItem('IAI_Planner_V2');
+                        const parsed = existingSaved ? JSON.parse(existingSaved) : { subs: [] };
+                        parsed.dataStore = newDataStore;
+                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify(parsed));
                     }
                 } catch (e) {
                     console.error('LocalStorage save failed', e);
+                }
+            };
+
+            const saveSubs = (newSubs) => {
+                setSubs(newSubs);
+                try {
+                    if (window.localStorage) {
+                        const existingSaved = window.localStorage.getItem('IAI_Planner_V2');
+                        const parsed = existingSaved ? JSON.parse(existingSaved) : { dataStore: {} };
+                        parsed.subs = newSubs;
+                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify(parsed));
+                    }
+                } catch (e) {
+                    console.error('LocalStorage subs save failed', e);
                 }
             };
 
@@ -1000,6 +1095,29 @@
                 showToast('Adăugat cu succes!', 'success');
             };
 
+            const [newSubName, setNewSubName] = useState('');
+            const [newSubAmount, setNewSubAmount] = useState('');
+
+            const handleAddSub = (e) => {
+                e.preventDefault();
+                if (!newSubName || !newSubAmount) return;
+
+                const amount = parseFloat(newSubAmount);
+                const subItem = {
+                    id: Date.now(),
+                    name: newSubName,
+                    amount: amount
+                };
+
+                const updatedList = [...subs, subItem];
+                saveSubs(updatedList);
+
+                setNewSubName('');
+                setNewSubAmount('');
+                setIsAddSubOpen(false);
+                showToast('Abonament setat cu succes!', 'success');
+            };
+
             const deleteExpense = (id) => {
                 const updatedList = expenses.filter(e => e.id !== id);
                 setExpenses(updatedList);
@@ -1033,6 +1151,45 @@
             const daysLeft = isCurrentMonth ? (daysInMonth - daysPassed + 1) : 0;
 
             const allowancePerDay = daysLeft > 0 && remaining > 0 ? (remaining / daysLeft).toFixed(0) : 0;
+
+            // Financial Allocator (50/30/20)
+            const needsCat = ['supermarket', 'utilitati', 'chirie', 'transport', 'sanatate', 'educatie', 'copii'];
+            const wantsCat = ['haine', 'restaurant', 'vacante', 'vicii', 'altele'];
+            const savingsCat = ['economii'];
+
+            const spentNeeds = expenses.filter(e => needsCat.includes(e.categoryId)).reduce((sum, e) => sum + e.amount, 0);
+            const spentWants = expenses.filter(e => wantsCat.includes(e.categoryId)).reduce((sum, e) => sum + e.amount, 0);
+            const spentSavings = expenses.filter(e => savingsCat.includes(e.categoryId)).reduce((sum, e) => sum + e.amount, 0);
+
+            const targetNeeds = totalIncome * 0.50;
+            const targetWants = totalIncome * 0.30;
+            const targetSavings = totalIncome * 0.20;
+
+            const pctNeeds = totalIncome > 0 ? Math.min((spentNeeds / targetNeeds) * 100, 100) : 0;
+            const pctWants = totalIncome > 0 ? Math.min((spentWants / targetWants) * 100, 100) : 0;
+            const pctSavings = totalIncome > 0 ? Math.min((spentSavings / targetSavings) * 100, 100) : 0;
+
+            // AI Offline Insights Generator
+            let aiMessage = "Balanța ta arată bine! Adaugă cheltuieli pentru a primi analize avansate din partea IAI.";
+            let aiIcon = "Cpu";
+            if (totalIncome > 0 && expenses.length > 0) {
+                if (spentNeeds > targetNeeds) {
+                    aiMessage = "⚠️ Ai depășit bugetul de bază (50%). Ai grijă la facturi, chirie și cumpărăturile uzuale din supermarket.";
+                    aiIcon = "AlertTriangle";
+                } else if (spentWants > targetWants) {
+                    aiMessage = "💡 Dorințele și ieșirile tale generează costuri peste limita de 30%. IAI îți recomandă moderație săptămâna asta.";
+                    aiIcon = "TrendingDown";
+                } else if (spentSavings < targetSavings && spentSavings > 0) {
+                    aiMessage = "📈 Ai început să economisești, dar încă nu ai atins targetul optim de 20%. Continuă să pui bani deoparte!";
+                    aiIcon = "PiggyBank";
+                } else if (spentSavings >= targetSavings) {
+                    aiMessage = "🏆 Excelent! Te încadrezi perfect în independența financiară. Economiile tale lucrează pentru tine!";
+                    aiIcon = "Award";
+                } else {
+                    aiMessage = "✅ Banii tăi sunt împărțiți excelent luna aceasta. IAI nu a detectat anomalii în comportamentul tău.";
+                    aiIcon = "CheckCircle2";
+                }
+            }
 
             // Chart rendering
             useEffect(() => {
@@ -1075,7 +1232,7 @@
             }, [activeTab, expenses]);
 
             const toggleHelp = (index) => {
-                setOpenHelpIndex(openHelpIndex === index ? null : index);
+                setOpenHelpIndex(prevIndex => prevIndex === index ? null : index);
             };
 
             return (
@@ -1233,6 +1390,51 @@
                     {activeTab === 'analytics' && (
                         <div className="content-section">
 
+                            <div className="section-title">Ajutor AI Offline</div>
+                            <div className="ai-card">
+                                <div className="ai-icon"><Icon name={aiIcon} /></div>
+                                <div style={{ fontSize: '13px', color: 'var(--white)', lineHeight: '1.5' }}>
+                                    <strong>Analiza IAI:</strong> <br />
+                                    <span style={{ color: 'var(--gray)' }}>{aiMessage}</span>
+                                </div>
+                            </div>
+
+                            <div className="section-title">Împărțitor Financiar (50/30/20)</div>
+                            <div className="card">
+                                {/* Needs */}
+                                <div style={{ marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
+                                        <span style={{ color: 'var(--info)' }}>Necesități (50%)</span>
+                                        <span style={{ color: 'var(--white)' }}>{spentNeeds.toFixed(0)} / {targetNeeds.toFixed(0)} RON</span>
+                                    </div>
+                                    <div className="allocator-bar">
+                                        <div className="allocator-fill" style={{ width: `${pctNeeds}%`, background: '#3498DB' }}></div>
+                                    </div>
+                                </div>
+
+                                {/* Wants */}
+                                <div style={{ marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
+                                        <span style={{ color: 'var(--warning)' }}>Dorințe (30%)</span>
+                                        <span style={{ color: 'var(--white)' }}>{spentWants.toFixed(0)} / {targetWants.toFixed(0)} RON</span>
+                                    </div>
+                                    <div className="allocator-bar">
+                                        <div className="allocator-fill" style={{ width: `${pctWants}%`, background: '#F39C12' }}></div>
+                                    </div>
+                                </div>
+
+                                {/* Savings */}
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
+                                        <span style={{ color: 'var(--emerald)' }}>Economii (20%)</span>
+                                        <span style={{ color: 'var(--white)' }}>{spentSavings.toFixed(0)} / {targetSavings.toFixed(0)} RON</span>
+                                    </div>
+                                    <div className="allocator-bar">
+                                        <div className="allocator-fill" style={{ width: `${pctSavings}%`, background: '#2ECC71' }}></div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* "Cât pot cheltui pe zi" Assistant Tool */}
                             <div className="section-title">Asistent Siguranță</div>
                             {isCurrentMonth ? (
@@ -1254,7 +1456,49 @@
                                 <p style={{ color: 'var(--gray)', fontSize: '14px', marginBottom: '20px' }}>Asistentul funcționează doar pentru luna în curs.</p>
                             )}
 
-                            <div className="section-title">Unde se duc banii tăi?</div>
+                            {/* Facturi & Recurente */}
+                            <div className="section-title" style={{ marginTop: '24px' }}>
+                                Facturi & Recurențe
+                                <button className="btn-outline" onClick={() => setIsAddSubOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Icon name="Plus" className="lucide-sm" /> Adaugă
+                                </button>
+                            </div>
+                            <div className="card" style={{ padding: '0' }}>
+                                {subs.length > 0 ? subs.map(sub => (
+                                    <div className="list-item" key={sub.id} style={{ border: 'none', borderRadius: 0, borderBottom: '1px solid var(--border-dim)', margin: 0 }}>
+                                        <div className="item-icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }}>
+                                            <Icon name="Repeat" className="lucide-sm" style={{ color: 'var(--gold)' }} />
+                                        </div>
+                                        <div className="item-details">
+                                            <div className="item-title">{sub.name}</div>
+                                        </div>
+                                        <div className="item-amount" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div>
+                                                {sub.amount.toFixed(0)} RON <span style={{ fontSize: '11px', color: 'var(--dgray)', fontWeight: 'normal' }}>/ lună</span>
+                                            </div>
+                                            <button style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
+                                                onClick={() => {
+                                                    if (confirm('Ștergi acest abonament?')) saveSubs(subs.filter(s => s.id !== sub.id));
+                                                }}>
+                                                <Icon name="Trash2" className="lucide-sm" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )) : (
+                                    <div style={{ padding: '24px', textAlign: 'center' }}>
+                                        <Icon name="CalendarClock" style={{ color: 'var(--dgray)', marginBottom: '8px' }} />
+                                        <p style={{ color: 'var(--gray)', fontSize: '13px' }}>Nu ai adăugat niciun abonament sau rată fixă.</p>
+                                    </div>
+                                )}
+                                {subs.length > 0 && (
+                                    <div style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--border-dim)', borderBottomLeftRadius: 'var(--radius)', borderBottomRightRadius: 'var(--radius)' }}>
+                                        <span style={{ color: 'var(--gray)', fontSize: '14px', fontWeight: '500' }}>Total Costuri Fixe:</span>
+                                        <strong style={{ color: 'var(--white)', fontFamily: 'var(--font-mono)', fontSize: '16px' }}>{subs.reduce((s, x) => s + x.amount, 0).toFixed(0)} RON</strong>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="section-title" style={{ marginTop: '24px' }}>Unde se duc banii tăi?</div>
                             <div className="card">
                                 {expenses.length > 0 ? (
                                     <div className="chart-container" style={{ height: '220px' }}>
@@ -1411,6 +1655,56 @@
                                     <button type="submit" className="btn btn-primary" style={{ marginTop: '20px' }}>
                                         Adaugă Plată <Icon name="Check" className="lucide-sm" />
                                     </button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add Subscription Modal Overlay */}
+                    {isAddSubOpen && (
+                        <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsAddSubOpen(false) }}>
+                            <div className="modal-sheet">
+                                <div className="modal-header">
+                                    <h2 style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Icon name="CalendarClock" style={{ color: 'var(--gold)' }} />
+                                        Abonament Nou
+                                    </h2>
+                                    <button className="close-btn" onClick={() => setIsAddSubOpen(false)}>
+                                        <Icon name="X" />
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleAddSub}>
+                                    <div className="form-group" style={{ position: 'relative' }}>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={newSubAmount}
+                                            onChange={e => setNewSubAmount(e.target.value)}
+                                            required
+                                            style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-mono)' }}
+                                            autoFocus
+                                        />
+                                    </div>
+
+                                    <div className="form-group" style={{ marginTop: '20px' }}>
+                                        <label>Nume Factură / Abonament</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Ex: Netflix, Chirie, Rată Bancă..."
+                                            value={newSubName}
+                                            onChange={e => setNewSubName(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group" style={{ marginTop: '24px' }}>
+                                        <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '18px' }}>
+                                            <Icon name="Check" />
+                                            Salvează Recurența
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
