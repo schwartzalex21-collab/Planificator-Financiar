@@ -644,6 +644,71 @@
             animation: fadeIn 0.3s;
         }
 
+        /* Horizontal Date Scroller */
+        .date-scroller {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .date-scroller::-webkit-scrollbar {
+            display: none;
+        }
+
+        .date-scroll-obj {
+            flex: 0 0 auto;
+            width: 56px;
+            height: 72px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-dim);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .date-scroll-obj .ds-day {
+            font-size: 11px;
+            color: var(--gray);
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .date-scroll-obj .ds-num {
+            font-size: 20px;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            color: var(--white);
+        }
+
+        .date-scroll-obj.active {
+            background: var(--gold);
+            border-color: var(--gold);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(243, 156, 18, 0.3);
+        }
+
+        .date-scroll-obj.active .ds-day,
+        .date-scroll-obj.active .ds-num {
+            color: #000;
+        }
+
+        .date-scroll-obj.today {
+            border-color: var(--blue);
+        }
+
+        .date-scroll-obj.today:not(.active) {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
         /* Help & Accordion CSS */
         .help-card {
             background: rgba(255, 255, 255, 0.02);
@@ -999,21 +1064,263 @@
                 transform: translate(-50%, 0);
             }
         }
+
+        /* --- PREMIUM CSS MICRO-ANIMATIONS --- */
+
+        /* 1. Staggered List Animation */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .list-item {
+            animation: slideInUp 0.4s ease-out both;
+        }
+
+        .list-item:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .list-item:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .list-item:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .list-item:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .list-item:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .list-item:nth-child(n+6) {
+            animation-delay: 0.3s;
+        }
+
+        /* 2. Modal Slide Up & Overlay Fade */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUpModal {
+            from {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-overlay {
+            animation: fadeIn 0.3s ease-out both;
+        }
+
+        .modal-sheet {
+            animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* 3. FAB Breathing Pulse */
+        @keyframes breathingShadow {
+            0% {
+                box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3), 0 0 0 0 rgba(243, 156, 18, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3), 0 0 0 10px rgba(243, 156, 18, 0);
+            }
+
+            100% {
+                box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3), 0 0 0 0 rgba(243, 156, 18, 0);
+            }
+        }
+
+        .fab {
+            animation: breathingShadow 3s infinite;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        /* 4. Tab / Page Transitions */
+        .content-section {
+            animation: fadeIn 0.3s ease-out both;
+        }
+
+        /* 5. AI Advisor Pulsing Focus */
+        @keyframes pulseRing {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+            }
+
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+
+        .intel-icon {
+            animation: pulseRing 2s infinite ease-in-out;
+        }
+
+        .daily-intel.intel-danger .intel-icon {
+            animation-name: none;
+            /* Disable pulse on red danger */
+        }
+
+        /* 6. Success States & Confetti */
+        @keyframes successGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+                border-color: rgba(46, 204, 113, 0.8);
+            }
+
+            50% {
+                box-shadow: 0 0 20px 0 rgba(46, 204, 113, 0.4);
+                border-color: var(--emerald);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+                border-color: rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        .glow-success {
+            animation: successGlow 1.2s ease-out both;
+        }
+
+        @keyframes checkmarkDraw {
+            0% {
+                stroke-dasharray: 50;
+                stroke-dashoffset: 50;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+
+            100% {
+                stroke-dashoffset: 0;
+                transform: scale(1);
+            }
+        }
+
+        .animated-check {
+            stroke-dasharray: 50;
+            animation: checkmarkDraw 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        @keyframes dropInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+
+            70% {
+                transform: scale(1.05) translateY(5px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .new-expense-drop {
+            animation: dropInScale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            transform-origin: center right;
+        }
+
+        /* 7. Loading Skeletons */
+        @keyframes skeletonShimmer {
+            0% {
+                background-position: -468px 0;
+            }
+
+            100% {
+                background-position: 468px 0;
+            }
+        }
+
+        .skeleton {
+            background: #11213D;
+            background-image: linear-gradient(to right, #11213D 0%, #1a3059 20%, #11213D 40%, #11213D 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 104px;
+            animation-duration: 1.5s;
+            animation-fill-mode: forwards;
+            animation-iteration-count: infinite;
+            animation-name: skeletonShimmer;
+            animation-timing-function: linear;
+        }
+
+        .skeleton-text {
+            height: 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-block {
+            height: 80px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+        }
+
+        .skeleton-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+        }
     </style>
 </head>
 
 <body>
     <div id="root">
         <div
-            style="padding: 40px 20px; text-align: center; color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <div style="font-size: 48px; font-weight: bold; color: #F39C12; margin-bottom: 20px;">IAI</div>
-            <h2 style="margin-bottom: 10px;">Aplicația se încarcă...</h2>
-            <p style="color: #636E72; font-size: 14px; max-width: 320px; margin-top: 10px;">
-                Dacă ecranul nu pornește, asigură-te că ai o conexiune activă la internet.
-                <br><br>
-                <strong style="color: #F39C12;">Notă pe Mobil (iPhone/Android):</strong> Nu deschide fișierul din
-                WhatsApp sau din secțiunea "Fișiere". Te rugăm să-l deschizi direct în <b>Safari</b> sau <b>Chrome</b>.
-            </p>
+            style="padding: 20px; max-width: 600px; margin: 0 auto; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; gap: 24px; padding-top: 60px;">
+            <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 10px;">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex: 1">
+                    <div class="skeleton skeleton-text" style="width: 40%"></div>
+                    <div class="skeleton skeleton-text" style="width: 60%"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-block" style="height: 140px;"></div>
+            <div class="skeleton skeleton-text" style="width: 30%; height: 20px;"></div>
+            <div class="skeleton skeleton-block" style="height: 70px;"></div>
+            <div class="skeleton skeleton-block" style="height: 70px;"></div>
+            <div class="skeleton skeleton-block" style="height: 70px;"></div>
         </div>
     </div>
 
@@ -1103,6 +1410,106 @@
             "Cea mai mare bogăție este lipsa datoriilor și pacea minții."
         ];
 
+        // Animated Number Hook for counting up effect
+        const useAnimatedNumber = (endValue, duration = 800, decimals = 0) => {
+            const [value, setValue] = useState(0);
+
+            useEffect(() => {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    // easeOutQuart
+                    const easeOut = 1 - Math.pow(1 - progress, 4);
+                    setValue(endValue * easeOut);
+
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        setValue(endValue);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }, [endValue, duration]);
+
+            return Number(value.toFixed(decimals));
+        };
+
+        const SwipeableExpenseItem = ({ expense, cat, onDelete, triggerHaptic, isNew }) => {
+            const [translateX, setTranslateX] = useState(0);
+            const [isDragging, setIsDragging] = useState(false);
+            const startXRef = useRef(0);
+            const currentXRef = useRef(0);
+
+            const handleTouchStart = (e) => {
+                startXRef.current = e.touches[0].clientX;
+                setIsDragging(true);
+            };
+
+            const handleTouchMove = (e) => {
+                if (!isDragging) return;
+                const currentX = e.touches[0].clientX;
+                const diff = currentX - startXRef.current;
+
+                if (diff < 0) {
+                    currentXRef.current = diff;
+                    setTranslateX(Math.max(diff, -100));
+                } else {
+                    currentXRef.current = 0;
+                    setTranslateX(0);
+                }
+            };
+
+            const handleTouchEnd = () => {
+                setIsDragging(false);
+                if (currentXRef.current < -60) {
+                    if (triggerHaptic) triggerHaptic([50, 30, 50]);
+                    setTranslateX(-500);
+                    setTimeout(() => {
+                        onDelete(expense.id);
+                    }, 200);
+                } else {
+                    setTranslateX(0);
+                }
+            };
+
+            return (
+                <div style={{ position: 'relative', overflow: 'hidden', marginBottom: '8px', borderRadius: '16px', touchAction: 'pan-y' }}>
+                    <div style={{
+                        position: 'absolute', top: 0, right: 0, bottom: 0, left: 0,
+                        background: 'var(--danger)', color: 'white',
+                        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+                        paddingRight: '20px', borderRadius: '16px', zIndex: 0
+                    }}>
+                        <Icon name="Trash2" />
+                    </div>
+
+                    <div
+                        className={`list-item ${isNew ? 'new-expense-drop glow-success' : ''}`}
+                        style={{
+                            transform: `translateX(${translateX}px)`,
+                            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+                            position: 'relative',
+                            zIndex: 1,
+                            margin: 0
+                        }}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        <div className="item-icon"><Icon name={cat.icon} /></div>
+                        <div className="item-details">
+                            <div className="item-title">{expense.name}</div>
+                            <div className="item-subtitle">{cat.name}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div className="item-amount">-{expense.amount} <span style={{ fontSize: '12px', color: 'var(--gray)' }}>RON</span></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         function App() {
             // Core State
             const [activeTab, setActiveTab] = useState('home');
@@ -1118,8 +1525,11 @@
             // Features
             const [dailyQuote, setDailyQuote] = useState('');
             const [toast, setToast] = useState(null);
+            const [currentStreak, setCurrentStreak] = useState(0);
             const [openHelpIndex, setOpenHelpIndex] = useState(null);
             const [isAddSubOpen, setIsAddSubOpen] = useState(false);
+            const [addedExpenseId, setAddedExpenseId] = useState(null);
+            const [isAddingSuccess, setIsAddingSuccess] = useState(false);
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
             const fileInputRef = useRef(null);
@@ -1151,6 +1561,19 @@
                 setTimeout(() => setToast(null), 3500);
             };
 
+            const triggerHaptic = (pattern) => {
+                try {
+                    if (window.navigator && window.navigator.vibrate) {
+                        window.navigator.vibrate(pattern);
+                    }
+                } catch (e) { }
+            };
+
+            const handleTabChange = (tab) => {
+                triggerHaptic([30]);
+                setActiveTab(tab);
+            };
+
             // Initialization
             useEffect(() => {
                 // Set daily quote
@@ -1165,6 +1588,24 @@
 
                 const storedPayday = window.localStorage ? window.localStorage.getItem('IAI_Planner_Payday') : null;
                 if (storedPayday) setPayday(parseInt(storedPayday));
+
+                const storedStreak = window.localStorage ? window.localStorage.getItem('IAI_Planner_Streak') : '0';
+                const storedLastLog = window.localStorage ? window.localStorage.getItem('IAI_Planner_LastLog') : null;
+
+                let activeStreak = parseInt(storedStreak) || 0;
+                if (storedLastLog) {
+                    const lastD = new Date(storedLastLog);
+                    const today = new Date();
+                    lastD.setHours(0, 0, 0, 0);
+                    today.setHours(0, 0, 0, 0);
+                    const diffTime = Math.abs(today - lastD);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays > 1) {
+                        activeStreak = 0; // Streak broken
+                        if (window.localStorage) window.localStorage.setItem('IAI_Planner_Streak', '0');
+                    }
+                }
+                setCurrentStreak(activeStreak);
 
                 const handleVisibilityChange = () => {
                     if (document.hidden) {
@@ -1251,6 +1692,53 @@
             const [newExpenseCat, setNewExpenseCat] = useState('supermarket');
             const [newExpenseDate, setNewExpenseDate] = useState(''); // Allows past days
 
+            // Voice Input Logic
+            const [isListening, setIsListening] = useState(false);
+
+            const handleVoiceInput = () => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    showToast('Funcția vocală nu este suportată pe acest browser.', 'error');
+                    return;
+                }
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'ro-RO';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = () => {
+                    triggerHaptic([50, 50]);
+                    setIsListening(true);
+                };
+
+                recognition.onresult = (event) => {
+                    const speechResult = event.results[0][0].transcript.toLowerCase();
+                    const amountMatch = speechResult.match(/\d+([.,]\d+)?/);
+                    if (amountMatch) {
+                        setNewExpenseAmount(amountMatch[0].replace(',', '.'));
+                        let desc = speechResult.replace(amountMatch[0], '').replace(/lei|ron|bani/g, '').trim();
+                        desc = desc.replace(/\b(o|un|de|pe|la)\b/g, '').trim();
+                        desc = desc.replace(/\s+/g, ' ').trim();
+                        setNewExpenseName(desc.charAt(0).toUpperCase() + desc.slice(1));
+                        showToast(`Detectat: "${speechResult}"`, 'success');
+                        triggerHaptic([30]);
+                    } else {
+                        showToast(`Nu am detectat suma în: "${speechResult}"`, 'warn');
+                    }
+                };
+
+                recognition.onerror = () => {
+                    showToast('Eroare la recunoașterea vocală.', 'error');
+                    setIsListening(false);
+                };
+
+                recognition.onend = () => {
+                    setIsListening(false);
+                };
+
+                recognition.start();
+            };
+
             // --- SMART AUTOCOMPLETE ---
             useEffect(() => {
                 if (newExpenseName.trim().length > 2) {
@@ -1330,7 +1818,13 @@
                 }
 
                 const amount = parseFloat(newExpenseAmount);
-                const activeDateString = newExpenseDate ? new Date(newExpenseDate).toISOString() : new Date().toISOString();
+
+                // Fix: JS .toISOString() uses UTC. Late night inputs (e.g. 11 PM GMT+2) shift to the next day.
+                // We must construct an ISO string from LOCAL time to strictly match the scroller logic.
+                let activeDateObj = newExpenseDate ? new Date(newExpenseDate) : new Date();
+                const tzOffset = activeDateObj.getTimezoneOffset() * 60000;
+                const localISOTime = (new Date(activeDateObj - tzOffset)).toISOString().slice(0, -1);
+                const activeDateString = localISOTime;
 
                 const expenseItem = {
                     id: Date.now(),
@@ -1364,8 +1858,29 @@
                 setNewExpenseAmount('');
                 setNewExpenseCat('supermarket');
                 setNewExpenseDate('');
-                setIsAddModalOpen(false);
-                showToast('Pagina a salvat detaliile cu succes!', 'success');
+
+                // Phase 8 WOW: Trigger Success Animations
+                setIsAddingSuccess(true);
+                triggerHaptic([100, 50, 100]); // Strong haptic validation
+                setAddedExpenseId(expenseItem.id);
+
+                setTimeout(() => {
+                    setIsAddingSuccess(false);
+                    setIsAddModalOpen(false);
+                    setTimeout(() => setAddedExpenseId(null), 1200); // Let the CSS glow fade out on the item naturally
+                }, 1000); // 1s Checkmark visibility
+
+                // Update Gamification Streak
+                const todayStr = new Date().toDateString();
+                const savedLastLog = window.localStorage ? window.localStorage.getItem('IAI_Planner_LastLog') : null;
+                if (savedLastLog !== todayStr) {
+                    const newStreak = currentStreak + 1;
+                    setCurrentStreak(newStreak);
+                    if (window.localStorage) {
+                        window.localStorage.setItem('IAI_Planner_LastLog', todayStr);
+                        window.localStorage.setItem('IAI_Planner_Streak', newStreak.toString());
+                    }
+                }
             };
 
             const [newSubName, setNewSubName] = useState('');
@@ -1396,6 +1911,7 @@
                 setExpenses(updatedList);
                 saveState(income, updatedList);
                 showToast('Cheltuială ștearsă!', 'info');
+                triggerHaptic([50, 30, 50]); // Feedback dublu pt ștergere
             };
 
             // Math Logic
@@ -1442,25 +1958,44 @@
             const pctWants = totalIncome > 0 ? Math.min((spentWants / targetWants) * 100, 100) : 0;
             const pctSavings = totalIncome > 0 ? Math.min((spentSavings / targetSavings) * 100, 100) : 0;
 
-            // AI Offline Insights Generator
+            // Global Savings for Gamification (Rank & Level)
+            let globalSavings = 0;
+            Object.values(dataStore).forEach(monthData => {
+                const mExps = monthData.expenses || [];
+                globalSavings += mExps.filter(e => e.categoryId === 'economii').reduce((s, e) => s + e.amount, 0);
+            });
+
+            let userRankName = "Începător Banii";
+            let userRankIcon = "Baby";
+            let userRankColor = "#7f8c8d";
+            if (globalSavings >= 100) { userRankName = "Novice Financiar"; userRankIcon = "Coins"; userRankColor = "#3498DB"; }
+            if (globalSavings >= 1000) { userRankName = "Investitor Inteligent"; userRankIcon = "TrendingUp"; userRankColor = "#2ECC71"; }
+            if (globalSavings >= 5000) { userRankName = "Milionar în Devenire"; userRankIcon = "Gem"; userRankColor = "#F39C12"; }
+            if (globalSavings >= 20000) { userRankName = "Maestru IAI"; userRankIcon = "Crown"; userRankColor = "#9B59B6"; }
+
+            // AI Offline Insights Generator & Allocation Engine
             let aiMessage = "Balanța ta arată bine! Adaugă cheltuieli pentru a primi analize avansate din partea IAI.";
             let aiIcon = "Cpu";
-            if (totalIncome > 0 && expenses.length > 0) {
-                if (spentNeeds > targetNeeds) {
-                    aiMessage = "⚠️ Ai depășit bugetul de bază (50%). Ai grijă la facturi, chirie și cumpărăturile uzuale din supermarket.";
-                    aiIcon = "AlertTriangle";
-                } else if (spentWants > targetWants) {
-                    aiMessage = "💡 Dorințele și ieșirile tale generează costuri peste limita de 30%. IAI îți recomandă moderație săptămâna asta.";
-                    aiIcon = "TrendingDown";
-                } else if (spentSavings < targetSavings && spentSavings > 0) {
-                    aiMessage = "📈 Ai început să economisești, dar încă nu ai atins targetul optim de 20%. Continuă să pui bani deoparte!";
-                    aiIcon = "PiggyBank";
-                } else if (spentSavings >= targetSavings) {
-                    aiMessage = "🏆 Excelent! Te încadrezi perfect în independența financiară. Economiile tale lucrează pentru tine!";
-                    aiIcon = "Award";
+            let recommendedSavings = 0;
+            let recommendedInvestments = 0;
+            let recommendedBuffer = 0;
+
+            if (totalIncome > 0) {
+                const totalFixed = subs.reduce((sum, s) => sum + s.amount, 0);
+                // "totalExpenses" variable already includes what was actually spent this month
+                const cashRemaining = totalIncome - totalFixed - totalExpenses;
+
+                if (cashRemaining > 0) {
+                    // Logic requested by user: "how much to put aside for savings, investments, etc."
+                    recommendedSavings = cashRemaining * 0.40; // 40% into emergency/short term
+                    recommendedInvestments = cashRemaining * 0.40; // 40% into stocks/long term
+                    recommendedBuffer = cashRemaining * 0.20; // 20% keep in account for buffer
+
+                    aiMessage = `Din salariul tău, ai cheltuit și blocat în facturi **${(totalFixed + totalExpenses).toFixed(0)} RON**. Din cei **${cashRemaining.toFixed(0)} RON** rămași pe luna aceasta, IAI îți recomandă să îi distribui inteligent pentru a genera avere.`;
+                    aiIcon = "TrendingUp";
                 } else {
-                    aiMessage = "✅ Banii tăi sunt împărțiți excelent luna aceasta. IAI nu a detectat anomalii în comportamentul tău.";
-                    aiIcon = "CheckCircle2";
+                    aiMessage = `Ești pe minus sau pe zero cu bugetul lunar ({cashRemaining.toFixed(0)} RON rămași). IAI recomandă tăierea cheltuielilor neesențiale urgent!`;
+                    aiIcon = "AlertTriangle";
                 }
             }
 
@@ -1597,6 +2132,47 @@
                 if (fileInputRef.current) fileInputRef.current.value = '';
             };
 
+            // CALENDAR VARS & HOISTED LOGIC
+            const { start: cycleStart, end: cycleEnd } = getCycleBounds(selectedDate, payday);
+            const mKey1 = getMonthKey(cycleStart);
+            const mKey2 = getMonthKey(cycleEnd);
+
+            let cycleExps = [];
+            if (dataStore[mKey1]?.expenses) cycleExps.push(...dataStore[mKey1].expenses);
+            if (mKey1 !== mKey2 && dataStore[mKey2]?.expenses) cycleExps.push(...dataStore[mKey2].expenses);
+            cycleExps = cycleExps.filter(e => new Date(e.date) >= cycleStart && new Date(e.date) <= cycleEnd);
+
+            const selectedStr = selectedDate.toISOString().split('T')[0];
+            const dayExps = cycleExps.filter(e => e.date.startsWith(selectedStr));
+            const dayTotal = dayExps.reduce((s, e) => s + e.amount, 0);
+
+            const spentBefore = cycleExps.filter(e => new Date(e.date) >= cycleStart && new Date(e.date) < new Date(selectedDate).setHours(0, 0, 0, 0)).reduce((s, e) => s + e.amount, 0);
+            const cycleIncome = parseFloat(dataStore[mKey1]?.income || 0);
+            const totalFixed = subs.reduce((s, x) => s + x.amount, 0);
+            const budgetAtStartOfDay = cycleIncome - totalFixed - spentBefore;
+
+            const daysLeftInCycle = Math.ceil((cycleEnd - new Date(selectedDate).setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
+
+            let activeDailyBudget = 0;
+            if (daysLeftInCycle > 0) {
+                activeDailyBudget = parseFloat((budgetAtStartOfDay / daysLeftInCycle).toFixed(0));
+            }
+
+            const cycleDaysArr = [];
+            let currD = new Date(cycleStart);
+            while (currD <= cycleEnd) {
+                cycleDaysArr.push(new Date(currD));
+                currD.setDate(currD.getDate() + 1);
+            }
+
+            // Phase 8: Animated Numbers
+            const animRemaining = useAnimatedNumber(remaining);
+            const animTotalExpenses = useAnimatedNumber(totalExpenses);
+            const animGlobalSavings = useAnimatedNumber(globalSavings);
+            const animActiveDailyBudget = useAnimatedNumber(activeDailyBudget);
+            const animDayTotal = useAnimatedNumber(dayTotal);
+            const animDailyRemaining = useAnimatedNumber(activeDailyBudget - dayTotal);
+
             // PIN screen override
             if (isLocked || isSettingPin) {
                 return (
@@ -1628,34 +2204,6 @@
                 );
             }
 
-            // CALENDAR VARS
-            const { start: cycleStart, end: cycleEnd } = getCycleBounds(selectedDate, payday);
-            const mKey1 = getMonthKey(cycleStart);
-            const mKey2 = getMonthKey(cycleEnd);
-
-            let cycleExps = [];
-            if (dataStore[mKey1]?.expenses) cycleExps.push(...dataStore[mKey1].expenses);
-            if (mKey1 !== mKey2 && dataStore[mKey2]?.expenses) cycleExps.push(...dataStore[mKey2].expenses);
-            cycleExps = cycleExps.filter(e => new Date(e.date) >= cycleStart && new Date(e.date) <= cycleEnd);
-
-            const selectedStr = selectedDate.toISOString().split('T')[0];
-            const dayExps = cycleExps.filter(e => e.date.startsWith(selectedStr));
-            const dayTotal = dayExps.reduce((s, e) => s + e.amount, 0);
-
-            const spentBefore = cycleExps.filter(e => new Date(e.date) >= cycleStart && new Date(e.date) < new Date(selectedDate).setHours(0, 0, 0, 0)).reduce((s, e) => s + e.amount, 0);
-            const cycleIncome = parseFloat(dataStore[mKey1]?.income || 0);
-            const totalFixed = subs.reduce((s, x) => s + x.amount, 0);
-            const budgetAtStartOfDay = cycleIncome - totalFixed - spentBefore;
-
-            const daysLeftInCycle = Math.ceil((cycleEnd - new Date(selectedDate).setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
-            const activeDailyBudget = daysLeftInCycle > 0 && budgetAtStartOfDay > 0 ? (budgetAtStartOfDay / daysLeftInCycle).toFixed(0) : 0;
-            const cycleDaysArr = [];
-            let currD = new Date(cycleStart);
-            while (currD <= cycleEnd) {
-                cycleDaysArr.push(new Date(currD));
-                currD.setDate(currD.getDate() + 1);
-            }
-
             return (
                 <div className={`app-container ${isBlurred ? 'app-blur' : ''}`}>
                     {/* Toasts */}
@@ -1674,7 +2222,24 @@
                             <div className="logo-box">IAI</div>
                             <div className="brand-text">
                                 <p>Inginerul cu AI</p>
-                                <h1>Bugetul Personal</h1>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <h1 style={{ margin: 0 }}>Bugetul Personal</h1>
+                                    <div style={{
+                                        background: currentStreak > 0 ? 'rgba(243, 156, 18, 0.15)' : 'rgba(255,255,255,0.05)',
+                                        color: currentStreak > 0 ? 'var(--gold)' : 'var(--dgray)',
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '11px',
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        transition: 'all 0.3s ease'
+                                    }}>
+                                        <Icon name="Flame" className="lucide-sm" style={{ width: '12px', height: '12px' }} />
+                                        {currentStreak} {currentStreak === 1 ? 'zi' : 'zile'}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className="month-selector">
@@ -1695,342 +2260,267 @@
                     {/* Navigation Logic */}
                     {activeTab === 'home' && (
                         <div className="content-section">
-                            {/* Motivational Banner */}
-                            <div className="motivation-card">
-                                <span className="quote-icon"><Icon name="Quote" /></span>
-                                <div className="quote-text">{dailyQuote}</div>
-                            </div>
-
-                            {/* Main Balance Card */}
+                            {/* Salary Configuration & Overall Monthly Balance */}
                             <div className="balance-card">
                                 <div className="progress-header">
-                                    <span className="balance-label">Disponibil Până la Salariu</span>
-                                    {totalIncome > 0 && (
-                                        <div className={`status-badge ${healthStatus.class}`}>
-                                            <Icon name={healthStatus.icon} className="lucide-sm" />
-                                            {healthStatus.msg}
+                                    <span className="balance-label">Balanță Lunară Rămasă</span>
+                                    {totalIncome > 0 && remaining > 0 && (
+                                        <div className="status-badge good">
+                                            <Icon name="TrendingUp" className="lucide-sm" />
+                                            Pozitiv
                                         </div>
                                     )}
                                 </div>
-                                <div className="balance-amount">{remaining.toFixed(0)} <span style={{ fontSize: '20px', color: 'var(--gray)' }}>RON</span></div>
-
-                                <div className="progress-track">
-                                    <div className={`progress-fill ${healthStatus.fill}`} style={{ width: `${spendPercentage}%` }}></div>
+                                <div className="balance-amount">
+                                    {animRemaining} <span style={{ fontSize: '20px', color: 'var(--gray)' }}>RON</span>
                                 </div>
-                                <div style={{ fontSize: '12px', color: 'var(--gray)', textAlign: 'right', marginTop: '4px' }}>
-                                    Cheltuit: {spendPercentage.toFixed(0)}%
+                                <div className="progress-bar-container">
+                                    <div className="progress-bar" style={{ width: `${spendPercentage}%`, background: `var(--${healthStatus.fill.split('-')[1]})` }}></div>
                                 </div>
-
-                                <div className="balance-stats">
-                                    <div className="stat-item">
-                                        <div style={{ fontSize: '11px', color: 'var(--dgray)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Venit (RON)</div>
-                                        <div className="stat-value green">
-                                            <Icon name="TrendingUp" className="lucide-sm" />
-                                            {totalIncome.toFixed(0)}
-                                        </div>
-                                    </div>
-                                    <div className="stat-item">
-                                        <div style={{ fontSize: '11px', color: 'var(--dgray)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ieșiri (RON)</div>
-                                        <div className="stat-value red">
-                                            <Icon name="TrendingDown" className="lucide-sm" />
-                                            {totalExpenses.toFixed(0)}
-                                        </div>
-                                    </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: 'var(--gray)' }}>
+                                    <span>Cheltuit: {animTotalExpenses}</span>
+                                    <span style={{ color: `var(--${healthStatus.fill.split('-')[1]})` }}>{spendPercentage.toFixed(1)}%</span>
                                 </div>
                             </div>
 
-                            <div className="section-title">Ajustează Venitul</div>
+                            <div className="section-title">Ajustează Venitul (Lunar)</div>
                             <div className="card">
-                                <input
-                                    type="number"
-                                    placeholder="Scrie venitul tău (RON)..."
-                                    value={income}
-                                    onChange={(e) => handleIncomeChange(e.target.value)}
-                                    style={{ fontSize: '20px', fontWeight: '700', fontFamily: 'var(--font-mono)' }}
-                                />
-                                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginTop: '12px', paddingBottom: '8px' }}>
-                                    {BUDGET_TEMPLATES.map((tpl, i) => (
-                                        <button key={i} className="btn-outline" onClick={() => handleIncomeChange(tpl.income)} style={{ whiteSpace: 'nowrap', cursor: 'pointer' }}>
-                                            {tpl.name}
-                                        </button>
-                                    ))}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                    <div className="item-icon" style={{ background: 'rgba(243, 156, 18, 0.1)', color: 'var(--gold)' }}>
+                                        <Icon name="Wallet" />
+                                    </div>
+                                    <input
+                                        type="number"
+                                        placeholder="Introdu suma..."
+                                        value={income}
+                                        onChange={(e) => handleIncomeChange(e.target.value)}
+                                        style={{ background: 'transparent', border: 'none', color: 'var(--white)', fontSize: '24px', fontWeight: 'bold', width: '100%', outline: 'none' }}
+                                    />
+                                    <span style={{ color: 'var(--gray)', fontWeight: 'bold' }}>RON</span>
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+                                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 10px', whiteSpace: 'nowrap' }} onClick={() => handleIncomeChange('3500')}>Minim</button>
+                                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 10px', whiteSpace: 'nowrap' }} onClick={() => handleIncomeChange('5000')}>Mediu</button>
+                                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 10px', whiteSpace: 'nowrap' }} onClick={() => handleIncomeChange('8000')}>Avansat</button>
+                                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 10px', whiteSpace: 'nowrap' }} onClick={() => handleIncomeChange('15000')}>Premium</button>
                                 </div>
                             </div>
 
-                            <div className="section-title">Activitate Recentă <button className="btn-outline" style={{ padding: '4px 10px', fontSize: '11px' }} onClick={() => setActiveTab('history')}>Vezi Tot</button></div>
-                            {expenses.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '30px 20px', color: 'var(--dgray)' }}>
-                                    <Icon name="Ghost" className="lucide-lg" style={{ opacity: 0.5, marginBottom: '10px' }} />
-                                    <p style={{ fontSize: '14px' }}>Nicio plată înregistrată luna aceasta.</p>
-                                </div>
-                            ) : (
-                                <div>
-                                    {expenses.slice(0, 4).map(e => {
-                                        const cat = CATEGORIES_DEFAULT.find(c => c.id === e.categoryId) || CATEGORIES_DEFAULT[CATEGORIES_DEFAULT.length - 1];
-                                        return (
-                                            <div key={e.id} className="list-item">
-                                                <div className="item-icon"><Icon name={cat.icon} /></div>
-                                                <div className="item-details">
-                                                    <div className="item-title">{e.name}</div>
-                                                    <div className="item-subtitle">{cat.name}</div>
-                                                </div>
-                                                <div className="item-amount">-{e.amount} <span style={{ fontSize: '12px', color: 'var(--gray)' }}>RON</span></div>
+                            {/* Facturi Section */}
+                            <div className="section-title" style={{ marginTop: '24px' }}>Facturi & Recurențe Lungi</div>
+                            <div className="card">
+                                {subs.length === 0 ? (
+                                    <p style={{ color: 'var(--gray)', fontSize: '13px', textAlign: 'center', padding: '10px 0' }}>Nu ai adăugat abonamente fixe. Acestea se auto-deduc lunar.</p>
+                                ) : (
+                                    subs.map(s => (
+                                        <div key={s.id} className="list-item" style={{ background: 'rgba(255,255,255,0.02)', marginBottom: '8px' }}>
+                                            <div className="item-icon" style={{ background: 'rgba(52, 152, 219, 0.1)', color: '#3498DB' }}>
+                                                <Icon name="Repeat" />
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {activeTab === 'history' && (
-                        <div className="content-section">
-                            <div className="section-title">Istoric Plăți</div>
-                            {expenses.length === 0 && <p style={{ color: 'var(--gray)' }}>Fără plăți.</p>}
-                            {expenses.map(e => {
-                                const cat = CATEGORIES_DEFAULT.find(c => c.id === e.categoryId) || CATEGORIES_DEFAULT[CATEGORIES_DEFAULT.length - 1];
-                                return (
-                                    <div key={e.id} className="list-item">
-                                        <div className="item-icon"><Icon name={cat.icon} /></div>
-                                        <div className="item-details">
-                                            <div className="item-title">{e.name}</div>
-                                            <div className="item-subtitle">{new Date(e.date).toLocaleDateString('ro-RO')} • {cat.name}</div>
+                                            <div className="item-details">
+                                                <div className="item-title">{s.name}</div>
+                                                <div className="item-subtitle">Deducere Automată</div>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div className="item-amount" style={{ color: '#E74C3C' }}>-{s.amount} <span style={{ fontSize: '10px' }}>RON</span></div>
+                                                <span onClick={() => deleteSub(s.id)} style={{ color: 'var(--danger)', fontSize: '12px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                                                    <Icon name="Trash2" className="lucide-sm" />Șterge
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div className="item-amount">-{e.amount} RON</div>
-                                            <span onClick={() => deleteExpense(e.id)} style={{ color: 'var(--danger)', fontSize: '12px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                                                <Icon name="Trash2" className="lucide-sm" />Șterge
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    ))
+                                )}
+                                <button className="btn-primary" style={{ marginTop: '16px', background: 'rgba(52, 152, 219, 0.1)', color: '#3498DB', border: '1px solid rgba(52, 152, 219, 0.3)' }} onClick={() => setShowBillModal(true)}>
+                                    <Icon name="Plus" className="lucide-sm" style={{ marginRight: '8px' }} />
+                                    Adaugă Factură Fixă
+                                </button>
+                            </div>
                         </div>
                     )}
 
                     {activeTab === 'calendar' && (
-                        <div className="content-section fade-in">
-                            <div className="section-title">
-                                Ciclu Salarial ({cycleStart.getDate()} {formatMonthInfo(cycleStart).split(' ')[0]} - {cycleEnd.getDate()} {formatMonthInfo(cycleEnd).split(' ')[0]})
+                        <div className="content-section">
+                            {/* Horizontal Date Scroller */}
+                            <div className="date-scroller">
+                                {cycleDaysArr.map((d, i) => {
+                                    const isSel = d.toDateString() === selectedDate.toDateString();
+                                    const isToday = d.toDateString() === today.toDateString();
+                                    return (
+                                        <div key={i}
+                                            className={`date-scroll-obj ${isSel ? 'active' : ''} ${isToday ? 'today' : ''}`}
+                                            onClick={() => setSelectedDate(d)}>
+                                            <div className="ds-day">{['Dum', 'Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm'][d.getDay()]}</div>
+                                            <div className="ds-num">{d.getDate()}</div>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
-                            <div className="card">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <button className="btn-outline" onClick={() => { const d = new Date(selectedDate); d.setMonth(d.getMonth() - 1); setSelectedDate(d); }}><Icon name="ChevronLeft" className="lucide-sm" /></button>
-                                    <div style={{ fontWeight: 'bold' }}>{formatMonthInfo(selectedDate)}</div>
-                                    <button className="btn-outline" onClick={() => { const d = new Date(selectedDate); d.setMonth(d.getMonth() + 1); setSelectedDate(d); }}><Icon name="ChevronRight" className="lucide-sm" /></button>
+                            {/* Main Rollover Balance Card */}
+                            <div className="balance-card">
+                                <div className="progress-header">
+                                    <span className="balance-label">
+                                        Rămas pentru {selectedDate.toDateString() === today.toDateString() ? 'Azi' : new Date(selectedDate).toLocaleDateString('ro-RO')}
+                                    </span>
+                                    {totalIncome > 0 && activeDailyBudget > 0 && (
+                                        <div className={`status-badge ${(activeDailyBudget - dayTotal) > 0 ? 'good' : 'bad'}`}>
+                                            <Icon name={(activeDailyBudget - dayTotal) > 0 ? "TrendingUp" : "AlertTriangle"} className="lucide-sm" />
+                                            {(activeDailyBudget - dayTotal) > 0 ? 'În Grafic' : 'Excedat'}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="balance-amount">
+                                    {animDailyRemaining} <span style={{ fontSize: '20px', color: 'var(--gray)' }}>RON</span>
+                                </div>
+                                <div style={{ fontSize: '12px', color: 'var(--gray)', textAlign: 'right', marginTop: '4px' }}>
+                                    (Rollover cumulat cu zilele economisite)
                                 </div>
 
-                                <div className="calendar-grid">
-                                    {['Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ', 'Du'].map(day => <div key={day} style={{ color: 'var(--dgray)', fontSize: '12px' }}>{day}</div>)}
+                                <div className="balance-stats" style={{ marginTop: '16px' }}>
+                                    <div className="stat-item">
+                                        <div style={{ fontSize: '11px', color: 'var(--dgray)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Buget Bază/Zi</div>
+                                        <div className="stat-value" style={{ color: 'var(--blue)' }}>
+                                            <Icon name="Target" className="lucide-sm" />
+                                            {activeDailyBudget}
+                                        </div>
+                                    </div>
+                                    <div className="stat-item">
+                                        <div style={{ fontSize: '11px', color: 'var(--dgray)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cheltuit pe {selectedDate.getDate()}</div>
+                                        <div className="stat-value red">
+                                            <Icon name="TrendingDown" className="lucide-sm" />
+                                            {dayTotal.toFixed(0)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                    {/* Padding offset */}
-                                    {Array.from({ length: (cycleStart.getDay() === 0 ? 6 : cycleStart.getDay() - 1) }).map((_, i) => <div key={`pad-${i}`} className="calendar-day pad" />)}
-
-                                    {cycleDaysArr.map(d => {
-                                        const dStr = d.toISOString().split('T')[0];
-                                        const hasExp = cycleExps.some(e => e.date.startsWith(dStr));
-                                        const isActive = dStr === selectedStr;
+                            <div className="section-title">Cheltuieli în Această Zi</div>
+                            {dayExps.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '30px 20px', color: 'var(--dgray)' }}>
+                                    <Icon name="Ghost" className="lucide-lg" style={{ opacity: 0.5, marginBottom: '10px' }} />
+                                    <p style={{ fontSize: '14px' }}>Nicio plată înregistrată pe {new Date(selectedDate).toLocaleDateString('ro-RO')}.</p>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div style={{ fontSize: '12px', color: 'var(--gray)', marginBottom: '12px', textAlign: 'center' }}>Gestiune nouă pe mobil: Fă swipe la stânga pe o rețetă pentru a o șterge.</div>
+                                    {dayExps.map(e => {
+                                        const cat = CATEGORIES_DEFAULT.find(c => c.id === e.categoryId) || CATEGORIES_DEFAULT[CATEGORIES_DEFAULT.length - 1];
                                         return (
-                                            <div
-                                                key={dStr}
-                                                className={`calendar-day ${isActive ? 'active' : ''} ${hasExp ? 'has-expense' : ''}`}
-                                                onClick={() => setSelectedDate(d)}
-                                            >
-                                                {d.getDate()}
-                                            </div>
+                                            <SwipeableExpenseItem
+                                                key={e.id}
+                                                expense={e}
+                                                cat={cat || CATEGORIES_DEFAULT.find(c => c.id === 'altele')}
+                                                onDelete={deleteExpense}
+                                                triggerHaptic={triggerHaptic}
+                                                isNew={addedExpenseId === e.id}
+                                            />
                                         );
                                     })}
                                 </div>
-                            </div>
-
-                            <div className="section-title" style={{ marginTop: '24px' }}>
-                                <Icon name="Target" className="lucide-sm" style={{ color: 'var(--gold)', marginRight: '6px' }} />
-                                Buget pe {selectedDate.getDate()} {formatMonthInfo(selectedDate).split(' ')[0]}
-                            </div>
-                            <div className={`daily-intel ${budgetAtStartOfDay <= 0 ? 'intel-danger' : ''}`}>
-                                <div className="intel-text" style={{ flex: 1 }}>
-                                    {budgetAtStartOfDay > 0 ? (
-                                        <p><span className="amount">{activeDailyBudget} RON</span> disponibil azi.</p>
-                                    ) : (
-                                        <p style={{ fontSize: '14px', color: 'var(--danger)', fontWeight: '600' }}>Buget epuizat în acest ciclu!</p>
-                                    )}
-                                    <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--gray)', display: 'flex', justifyContent: 'space-between' }}>
-                                        <span>Cheltuit azi:</span>
-                                        <span style={{ color: dayTotal > 0 ? 'var(--danger)' : 'var(--emerald)', fontWeight: 'bold' }}>{dayTotal > 0 ? `-${dayTotal.toFixed(0)}` : '0'} RON</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="section-title" style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                Istoric pe Data Selectată
-                                <button className="btn-outline" onClick={() => {
-                                    setNewExpenseDate(selectedStr);
-                                    setIsAddModalOpen(true);
-                                }} style={{ border: 'none', color: 'var(--gold)', padding: 0 }}> + Adaugă Pe Azi</button>
-                            </div>
-
-                            <div className="card" style={{ padding: 0 }}>
-                                {dayExps.length > 0 ? dayExps.map(exp => {
-                                    const cat = CATEGORIES_DEFAULT.find(c => c.id === exp.categoryId) || CATEGORIES_DEFAULT[CATEGORIES_DEFAULT.length - 1];
-                                    return (
-                                        <div className="list-item" key={exp.id} style={{ borderBottom: '1px solid var(--border-dim)', borderRadius: 0, margin: 0 }}>
-                                            <div className="item-icon"><Icon name={cat.icon} /></div>
-                                            <div className="item-details">
-                                                <div className="item-title">{exp.name}</div>
-                                                <div className="item-subtitle">{cat.name}</div>
-                                            </div>
-                                            <div style={{ textAlign: 'right' }}>
-                                                <div className="item-amount expense">-{exp.amount.toFixed(0)} RON</div>
-                                                <span onClick={() => {
-                                                    // Standard Delete
-                                                    const updatedList = expenses.filter(e => e.id !== exp.id);
-                                                    setExpenses(updatedList);
-                                                    saveState(income, updatedList);
-                                                    // Ensure global localStorage gets updated if cross-month
-                                                    const tKey = getMonthKey(new Date(exp.date));
-                                                    if (tKey !== getMonthKey(currentMonth)) {
-                                                        const mt = dataStore[tKey] || { income: '', expenses: [] };
-                                                        const ds = { ...dataStore, [tKey]: { ...mt, expenses: mt.expenses.filter(e => e.id !== exp.id) } };
-                                                        setDataStore(ds);
-                                                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify({ dataStore: ds, subs }));
-                                                    }
-                                                }} style={{ color: 'var(--danger)', fontSize: '12px', cursor: 'pointer' }}>Șterge</span>
-                                            </div>
-                                        </div>
-                                    );
-                                }) : (
-                                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--gray)', fontSize: '13px' }}>
-                                        Nicio cheltuială salvată în această zi. <br />Banii tăi sunt la loc sigur!
-                                    </div>
-                                )}
-                            </div>
+                            )}
                         </div>
                     )}
 
                     {activeTab === 'analytics' && (
                         <div className="content-section">
-
-                            <div className="section-title">Ajutor AI Offline</div>
-                            <div className="ai-card">
-                                <div className="ai-icon"><Icon name={aiIcon} /></div>
-                                <div style={{ fontSize: '13px', color: 'var(--white)', lineHeight: '1.5' }}>
-                                    <strong>Analiza IAI:</strong> <br />
-                                    <span style={{ color: 'var(--gray)' }}>{aiMessage}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '8px' }}>
+                                <div className="section-title" style={{ margin: 0, paddingBottom: 0 }}>
+                                    Statut: <span style={{ color: userRankColor, marginLeft: '6px', padding: '4px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '14px' }}>{userRankName}</span>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <Icon name={userRankIcon} className="lucide-sm" style={{ color: userRankColor }} />
+                                    <span style={{ fontSize: '13px', color: 'var(--white)', fontWeight: 'bold' }}>{animGlobalSavings} <span style={{ color: 'var(--gray)', fontWeight: 'normal' }}>Economisiți</span></span>
                                 </div>
                             </div>
 
-                            <div className="section-title">Împărțitor Financiar (50/30/20)</div>
-                            <div className="card">
-                                {/* Needs */}
-                                <div style={{ marginBottom: '16px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-                                        <span style={{ color: 'var(--info)' }}>Necesități (50%)</span>
-                                        <span style={{ color: 'var(--white)' }}>{spentNeeds.toFixed(0)} / {targetNeeds.toFixed(0)} RON</span>
-                                    </div>
-                                    <div className="allocator-bar">
-                                        <div className="allocator-fill" style={{ width: `${pctNeeds}%`, background: '#3498DB' }}></div>
-                                    </div>
+                            <div className="daily-intel-card" style={{ marginBottom: '24px' }}>
+                                <div className="intel-header">
+                                    <div className="intel-icon"><Icon name={aiIcon} /></div>
+                                    <div className="intel-title">Consultantul Tău Inteligent</div>
                                 </div>
+                                <div className="intel-body" style={{ lineHeight: '1.5' }}>{aiMessage}</div>
 
-                                {/* Wants */}
-                                <div style={{ marginBottom: '16px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-                                        <span style={{ color: 'var(--warning)' }}>Dorințe (30%)</span>
-                                        <span style={{ color: 'var(--white)' }}>{spentWants.toFixed(0)} / {targetWants.toFixed(0)} RON</span>
-                                    </div>
-                                    <div className="allocator-bar">
-                                        <div className="allocator-fill" style={{ width: `${pctWants}%`, background: '#F39C12' }}></div>
-                                    </div>
-                                </div>
+                                {totalIncome > 0 && (totalIncome - totalExpenses - subs.reduce((sum, s) => sum + s.amount, 0)) > 0 && (
+                                    <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                                        <div style={{ fontSize: '12px', color: 'var(--gray)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Plan de Gestiune Recomandat:</div>
 
-                                {/* Savings */}
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-                                        <span style={{ color: 'var(--emerald)' }}>Economii (20%)</span>
-                                        <span style={{ color: 'var(--white)' }}>{spentSavings.toFixed(0)} / {targetSavings.toFixed(0)} RON</span>
-                                    </div>
-                                    <div className="allocator-bar">
-                                        <div className="allocator-fill" style={{ width: `${pctSavings}%`, background: '#2ECC71' }}></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* "Cât pot cheltui pe zi" Assistant Tool */}
-                            <div className="section-title">Asistent Siguranță</div>
-                            {isCurrentMonth ? (
-                                <div className={`daily-intel ${remaining <= 0 ? 'intel-danger' : ''}`}>
-                                    <div className="intel-icon">
-                                        <Icon name={remaining <= 0 ? "Frown" : "CalendarHeart"} className="lucide-lg" />
-                                    </div>
-                                    <div className="intel-text">
-                                        <h4>Buget zilnic recomandat</h4>
-                                        {remaining > 0 ? (
-                                            <p><span className="amount">{allowancePerDay} RON</span> / zi</p>
-                                        ) : (
-                                            <p style={{ fontSize: '14px', color: 'var(--danger)', fontWeight: '600' }}>Ai depășit bugetul. Taie din cheltuieli!</p>
-                                        )}
-                                        <p style={{ fontSize: '11px', marginTop: '4px', opacity: 0.8 }}>{daysLeft} zile rămase în luna curentă.</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <p style={{ color: 'var(--gray)', fontSize: '14px', marginBottom: '20px' }}>Asistentul funcționează doar pentru luna în curs.</p>
-                            )}
-
-                            {/* Facturi & Recurente */}
-                            <div className="section-title" style={{ marginTop: '24px' }}>
-                                Facturi & Recurențe
-                                <button className="btn-outline" onClick={() => setIsAddSubOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Icon name="Plus" className="lucide-sm" /> Adaugă
-                                </button>
-                            </div>
-                            <div className="card" style={{ padding: '0' }}>
-                                {subs.length > 0 ? subs.map(sub => (
-                                    <div className="list-item" key={sub.id} style={{ border: 'none', borderRadius: 0, borderBottom: '1px solid var(--border-dim)', margin: 0 }}>
-                                        <div className="item-icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }}>
-                                            <Icon name="Repeat" className="lucide-sm" style={{ color: 'var(--gold)' }} />
-                                        </div>
-                                        <div className="item-details">
-                                            <div className="item-title">{sub.name}</div>
-                                        </div>
-                                        <div className="item-amount" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                            <div>
-                                                {sub.amount.toFixed(0)} RON <span style={{ fontSize: '11px', color: 'var(--dgray)', fontWeight: 'normal' }}>/ lună</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Icon name="PiggyBank" className="lucide-sm" style={{ color: '#2ECC71' }} />
+                                                <span style={{ color: 'var(--white)', fontSize: '13px' }}>Economii (40%)</span>
                                             </div>
-                                            <button style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }}
-                                                onClick={() => {
-                                                    if (confirm('Ștergi acest abonament?')) saveSubs(subs.filter(s => s.id !== sub.id));
-                                                }}>
-                                                <Icon name="Trash2" className="lucide-sm" />
-                                            </button>
+                                            <span style={{ color: '#2ECC71', fontWeight: 'bold' }}>+{recommendedSavings.toFixed(0)} RON</span>
                                         </div>
-                                    </div>
-                                )) : (
-                                    <div style={{ padding: '24px', textAlign: 'center' }}>
-                                        <Icon name="CalendarClock" style={{ color: 'var(--dgray)', marginBottom: '8px' }} />
-                                        <p style={{ color: 'var(--gray)', fontSize: '13px' }}>Nu ai adăugat niciun abonament sau rată fixă.</p>
-                                    </div>
-                                )}
-                                {subs.length > 0 && (
-                                    <div style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--border-dim)', borderBottomLeftRadius: 'var(--radius)', borderBottomRightRadius: 'var(--radius)' }}>
-                                        <span style={{ color: 'var(--gray)', fontSize: '14px', fontWeight: '500' }}>Total Costuri Fixe:</span>
-                                        <strong style={{ color: 'var(--white)', fontFamily: 'var(--font-mono)', fontSize: '16px' }}>{subs.reduce((s, x) => s + x.amount, 0).toFixed(0)} RON</strong>
+
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Icon name="TrendingUp" className="lucide-sm" style={{ color: '#3498DB' }} />
+                                                <span style={{ color: 'var(--white)', fontSize: '13px' }}>Investiții (40%)</span>
+                                            </div>
+                                            <span style={{ color: '#3498DB', fontWeight: 'bold' }}>+{recommendedInvestments.toFixed(0)} RON</span>
+                                        </div>
+
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Icon name="Shield" className="lucide-sm" style={{ color: '#F39C12' }} />
+                                                <span style={{ color: 'var(--white)', fontSize: '13px' }}>Fond Siguranță (20%)</span>
+                                            </div>
+                                            <span style={{ color: '#F39C12', fontWeight: 'bold' }}>+{recommendedBuffer.toFixed(0)} RON</span>
+                                        </div>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="section-title" style={{ marginTop: '24px' }}>Unde se duc banii tăi?</div>
-                            <div className="card">
-                                {expenses.length > 0 ? (
-                                    <div className="chart-container" style={{ height: '220px' }}>
-                                        <canvas ref={chartRef}></canvas>
+                            <div className="card" style={{ textAlign: 'center', position: 'relative', height: '280px', paddingTop: '20px' }}>
+                                {expenses.length === 0 ? (
+                                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--gray)' }}>
+                                        <Icon name="PieChart" style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '10px' }} />
+                                        <p>Nu există date pentru grafic.</p>
                                     </div>
                                 ) : (
-                                    <p style={{ color: 'var(--gray)', textAlign: 'center', padding: '20px' }}>Nu există cheltuieli înregistrate pentru a afișa graficul.</p>
+                                    <canvas ref={chartRef}></canvas>
                                 )}
+                            </div>
+
+                            <div className="section-title" style={{ marginTop: '30px' }}>Independență Financiară (50/30/20)</div>
+                            <div className="card" style={{ paddingBottom: '10px' }}>
+                                <div className="split-item">
+                                    <div className="split-header">
+                                        <span style={{ color: 'var(--white)' }}>🔥 Necesități (50%)</span>
+                                        <span style={{ color: 'var(--gray)' }}>{spentNeeds.toFixed(0)} / {targetNeeds.toFixed(0)} RON</span>
+                                    </div>
+                                    <div className="progress-bar-container" style={{ background: 'rgba(231, 76, 60, 0.1)' }}>
+                                        <div className="progress-bar" style={{ width: `${pctNeeds}%`, background: '#E74C3C' }}></div>
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Chirie, utilități, mâncare bază.</p>
+                                </div>
+
+                                <div className="split-item" style={{ marginTop: '16px' }}>
+                                    <div className="split-header">
+                                        <span style={{ color: 'var(--white)' }}>✨ Dorințe (30%)</span>
+                                        <span style={{ color: 'var(--gray)' }}>{spentWants.toFixed(0)} / {targetWants.toFixed(0)} RON</span>
+                                    </div>
+                                    <div className="progress-bar-container" style={{ background: 'rgba(243, 156, 18, 0.1)' }}>
+                                        <div className="progress-bar" style={{ width: `${pctWants}%`, background: '#F39C12' }}></div>
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Haine, ieșiri, vacanțe, vicii.</p>
+                                </div>
+
+                                <div className="split-item" style={{ marginTop: '16px' }}>
+                                    <div className="split-header">
+                                        <span style={{ color: 'var(--white)' }}>💰 Economii & Investiții (20%)</span>
+                                        <span style={{ color: 'var(--gray)' }}>{spentSavings.toFixed(0)} / {targetSavings.toFixed(0)} RON</span>
+                                    </div>
+                                    <div className="progress-bar-container" style={{ background: 'rgba(46, 204, 113, 0.1)' }}>
+                                        <div className="progress-bar" style={{ width: `${pctSavings}%`, background: '#2ECC71' }}></div>
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Banii puși deoparte astăzi, te salvează mâine.</p>
+                                </div>
                             </div>
                         </div>
                     )}
+
+
 
                     {activeTab === 'settings' && (
                         <div className="content-section">
@@ -2149,29 +2639,30 @@
 
                     {/* Navigation Bar */}
                     <div className="bottom-nav">
-                        <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
+                        <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleTabChange('home')}>
                             <Icon name="LayoutDashboard" />
                             <span className="nav-label">Acasă</span>
                         </div>
 
-                        <div className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>
+                        <div className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => handleTabChange('calendar')}>
                             <Icon name="CalendarDays" />
                             <span className="nav-label">Calendar</span>
                         </div>
 
                         <div style={{ width: '60px' }}></div>
 
-                        <div className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
+                        <div className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => handleTabChange('analytics')}>
                             <Icon name="PieChart" />
                             <span className="nav-label">Analiză</span>
                         </div>
-                        <div className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
+
+                        <div className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => handleTabChange('settings')}>
                             <Icon name="Settings" />
                             <span className="nav-label">Ajutor</span>
                         </div>
 
                         {/* Add FAB Icon */}
-                        <div className="fab" onClick={() => setIsAddModalOpen(true)}>
+                        <div className="fab" onClick={() => { triggerHaptic([50]); setIsAddModalOpen(true); }}>
                             <Icon name="Plus" style={{ width: '32px', height: '32px' }} />
                         </div>
                     </div>
@@ -2186,53 +2677,84 @@
                                         <Icon name="X" />
                                     </button>
                                 </div>
-
-                                <form onSubmit={handleAddExpense}>
-                                    <div className="form-group" style={{ position: 'relative' }}>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            placeholder="0.00"
-                                            value={newExpenseAmount}
-                                            onChange={e => setNewExpenseAmount(e.target.value)}
-                                            required
-                                            style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-mono)', paddingLeft: '50px' }}
-                                            autoFocus
-                                        />
-                                        <span style={{ position: 'absolute', left: '16px', top: '16px', fontSize: '24px', color: 'var(--dgray)', fontWeight: '700', fontFamily: 'var(--font-mono)' }}>-</span>
+                                {isAddingSuccess ? (
+                                    <div style={{ padding: '60px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        <svg className="animated-check" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        <h3 style={{ color: 'var(--emerald)', marginTop: '20px', fontSize: '24px' }}>Salvat cu succes!</h3>
                                     </div>
-
-                                    <div className="form-group">
-                                        <label>Ce ai cumpărat?</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ex: Factură EON, Mega Image..."
-                                            value={newExpenseName}
-                                            onChange={e => setNewExpenseName(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label>Categorie</label>
-                                        <div style={{ position: 'relative' }}>
-                                            <select value={newExpenseCat} onChange={e => setNewExpenseCat(e.target.value)}>
-                                                {CATEGORIES_DEFAULT.map(c => (
-                                                    <option key={c.id} value={c.id}>{c.name}</option>
-                                                ))}
-                                            </select>
+                                ) : (
+                                    <form onSubmit={handleAddExpense}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                                            <button
+                                                type="button"
+                                                onClick={handleVoiceInput}
+                                                style={{
+                                                    background: isListening ? 'rgba(231, 76, 60, 0.2)' : 'var(--bg-lighter)',
+                                                    border: `1px solid ${isListening ? '#E74C3C' : 'var(--border)'}`,
+                                                    color: isListening ? '#E74C3C' : 'var(--white)',
+                                                    padding: '12px 24px',
+                                                    borderRadius: '30px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.3s',
+                                                    fontFamily: 'var(--font-main)'
+                                                }}
+                                            >
+                                                <Icon name="Mic" className={isListening ? 'lucide-pulse' : ''} />
+                                                {isListening ? 'Te ascult...' : 'Adaugă Vocal (ex: "cafea 15 lei")'}
+                                            </button>
                                         </div>
-                                    </div>
 
-                                    <div className="form-group" style={{ marginTop: '20px' }}>
-                                        <label>Modificare Dată (Opțional)</label>
-                                        <input type="date" value={newExpenseDate} onChange={e => setNewExpenseDate(e.target.value)} style={{ padding: '12px', background: 'var(--bg-dark)', color: 'var(--gray)', border: '1px solid var(--border-dim)', borderRadius: '8px', width: '100%', fontFamily: 'var(--font-mono)' }} />
-                                    </div>
+                                        <div className="form-group" style={{ position: 'relative' }}>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                value={newExpenseAmount}
+                                                onChange={e => setNewExpenseAmount(e.target.value)}
+                                                required
+                                                style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-mono)', paddingLeft: '50px' }}
+                                                autoFocus
+                                            />
+                                            <span style={{ position: 'absolute', left: '16px', top: '16px', fontSize: '24px', color: 'var(--dgray)', fontWeight: '700', fontFamily: 'var(--font-mono)' }}>-</span>
+                                        </div>
 
-                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '20px' }}>
-                                        Adaugă Plată <Icon name="Check" className="lucide-sm" />
-                                    </button>
-                                </form>
+                                        <div className="form-group">
+                                            <label>Ce ai cumpărat?</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Ex: Factură EON, Mega Image..."
+                                                value={newExpenseName}
+                                                onChange={e => setNewExpenseName(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Categorie</label>
+                                            <div style={{ position: 'relative' }}>
+                                                <select value={newExpenseCat} onChange={e => setNewExpenseCat(e.target.value)}>
+                                                    {CATEGORIES_DEFAULT.map(c => (
+                                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group" style={{ marginTop: '20px' }}>
+                                            <label>Modificare Dată (Opțional)</label>
+                                            <input type="date" value={newExpenseDate} onChange={e => setNewExpenseDate(e.target.value)} style={{ padding: '12px', background: 'var(--bg-dark)', color: 'var(--gray)', border: '1px solid var(--border-dim)', borderRadius: '8px', width: '100%', fontFamily: 'var(--font-mono)' }} />
+                                        </div>
+
+                                        <button type="submit" className="btn btn-primary" style={{ marginTop: '20px' }}>
+                                            Adaugă Plată <Icon name="Check" className="lucide-sm" />
+                                        </button>
+                                    </form>
+                                )}
                             </div>
                         </div>
                     )}
