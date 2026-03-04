@@ -24,6 +24,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <!-- Lucide Icons (Premium SVG Icons) -->
@@ -43,7 +44,7 @@
         }
 
         :root {
-            /* Brand Colors from style.css */
+            /* Brand Colors */
             --midnight: #0A1931;
             --midnight2: #0d2040;
             --anthracite: #2D3436;
@@ -54,7 +55,7 @@
             --white: #FFFFFF;
             --gray: #BDC3C7;
             --dgray: #636E72;
-            --bg: #080f1e;
+            --bg: #060d1a;
             --bg2: #0d1829;
             --card-bg: #0f1e35;
             --border: rgba(243, 156, 18, 0.15);
@@ -64,15 +65,23 @@
             --danger: #ff4d4d;
             --warning: #ffb84d;
             --info: #4da6ff;
+            --blue: #3498DB;
+            --purple: #9B59B6;
+            --teal: #1abc9c;
 
             /* Visuals */
-            --glass-bg: rgba(8, 15, 30, 0.85);
-            --blur: blur(16px);
+            --glass-bg: rgba(6, 13, 26, 0.88);
+            --card-glass: rgba(15, 30, 53, 0.7);
+            --blur: blur(20px);
+            --blur-sm: blur(10px);
             --font-head: 'Outfit', sans-serif;
             --font-body: 'Plus Jakarta Sans', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
-            --radius: 12px;
-            --radius-lg: 20px;
+            --radius: 14px;
+            --radius-lg: 22px;
+            --radius-xl: 30px;
+            --shadow-gold: 0 8px 32px rgba(243, 156, 18, 0.25);
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
         }
 
         body {
@@ -82,13 +91,13 @@
             min-height: 100vh;
             line-height: 1.65;
             overflow-x: hidden;
-            padding-bottom: 90px;
-            /* Space for bottom nav */
-            /* Add delicate background grid pattern */
+            padding-bottom: 100px;
+            /* Premium radial gradient + grid */
             background-image:
-                linear-gradient(rgba(243, 156, 18, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(243, 156, 18, 0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(243, 156, 18, 0.08) 0%, transparent 60%),
+                linear-gradient(rgba(243, 156, 18, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(243, 156, 18, 0.025) 1px, transparent 1px);
+            background-size: auto, 40px 40px, 40px 40px;
         }
 
         h1,
@@ -187,40 +196,36 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: var(--card-bg);
-            padding: 8px 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 4px;
+            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        }
+
+        .month-selector::-webkit-scrollbar {
+            display: none;
+        }
+
+        .month-pill {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 16px;
             border-radius: 100px;
             border: 1px solid var(--border-dim);
-        }
-
-        .month-btn {
-            background: transparent;
-            border: none;
             color: var(--gray);
-            cursor: pointer;
-            padding: 0 4px;
-            transition: color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .month-btn:hover {
-            color: var(--gold);
-        }
-
-        .month-btn:disabled {
-            color: rgba(255, 255, 255, 0.1);
-            cursor: not-allowed;
-        }
-
-        .month-label {
             font-size: 13px;
             font-weight: 700;
             font-family: var(--font-head);
-            min-width: 65px;
-            text-align: center;
-            color: var(--white);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .month-pill.active {
+            background: rgba(243, 156, 18, 0.15);
+            color: var(--gold);
+            border-color: rgba(243, 156, 18, 0.4);
         }
 
         /* Motivational Widget */
@@ -416,12 +421,102 @@
             color: var(--white);
         }
 
-        .card {
+        /* Hero Dashboard UI */
+        .hero-dashboard {
+            background: linear-gradient(135deg, var(--midnight), var(--midnight2));
+            margin: -20px -20px 40px -20px;
+            padding: 30px 20px 50px 20px;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            position: relative;
+            text-align: center;
+            border-bottom: 1px solid var(--border-dim);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .hero-dashboard .balance-label {
+            color: var(--gray);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .hero-dashboard .balance-amount {
+            font-size: 42px;
+            font-weight: 900;
+            font-family: var(--font-mono);
+            color: var(--white);
+            line-height: 1;
+        }
+
+        .hero-cards-wrapper {
+            position: absolute;
+            bottom: -30px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .hero-card {
+            flex: 1;
             background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-dim);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-card.income .hero-icon {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--emerald);
+        }
+
+        .hero-card.expense .hero-icon {
+            background: rgba(255, 77, 77, 0.15);
+            color: var(--danger);
+        }
+
+        .hero-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-card-details h5 {
+            font-size: 11px;
+            color: var(--gray);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .hero-card-details p {
+            font-size: 16px;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            color: var(--white);
+        }
+
+        .card {
+            background: var(--card-glass);
+            backdrop-filter: var(--blur-sm);
+            -webkit-backdrop-filter: var(--blur-sm);
             border-radius: var(--radius-lg);
             padding: 20px;
             margin-bottom: 20px;
             border: 1px solid var(--border-dim);
+            box-shadow: var(--shadow-card);
         }
 
         /* Inputs & Buttons */
@@ -570,45 +665,70 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 12px 20px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-            background: var(--glass-bg);
+            padding: 10px 16px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            background: rgba(6, 13, 26, 0.92);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             align-items: center;
             z-index: 100;
-            border-top: 1px solid var(--border-dim);
+            border-top: 1px solid rgba(243, 156, 18, 0.12);
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             color: var(--dgray);
             cursor: pointer;
-            transition: color 0.2s;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 60px;
+            padding: 6px 0;
+            border-radius: 12px;
+            position: relative;
         }
 
         .nav-item.active {
             color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            width: 4px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(243, 156, 18, 0.8);
         }
 
         .nav-label {
             font-size: 10px;
             font-weight: 700;
             font-family: var(--font-head);
+            transition: opacity 0.2s;
+        }
+
+        .nav-item:not(.active) .nav-label {
+            opacity: 0.6;
         }
 
         /* Floating Add Button */
+        .fab-wrapper {
+            position: relative;
+            top: -20px;
+            width: 60px;
+            display: flex;
+            justify-content: center;
+        }
+
         .fab {
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%);
             width: 56px;
             height: 56px;
             background: var(--gold);
@@ -625,7 +745,7 @@
         }
 
         .fab:active {
-            transform: translateX(-50%) scale(0.9);
+            transform: scale(0.9);
         }
 
         /* Modal Overlay */
@@ -925,15 +1045,37 @@
         }
 
         .modal-sheet {
-            background: var(--bg);
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             width: 100%;
             border-radius: 24px 24px 0 0;
             padding: 24px;
             padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
             animation: slideUp 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-            border-top: 1px solid var(--border-dim);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             max-height: 90vh;
             overflow-y: auto;
+        }
+
+        .goal-card-premium {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.2));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .goal-card-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(243, 156, 18, 0.2), transparent);
         }
 
         @keyframes slideUp {
@@ -1019,44 +1161,51 @@
             line-height: 1;
         }
 
-        /* Notification Toast */
+        /* Notification Toast — bottom position on mobile */
         .toast {
             position: fixed;
-            top: 20px;
+            bottom: calc(90px + env(safe-area-inset-bottom, 0px));
             left: 50%;
             transform: translateX(-50%);
-            background: var(--glass-bg);
+            background: rgba(15, 22, 40, 0.97);
             backdrop-filter: var(--blur);
-            border: 1px solid var(--border-dim);
-            padding: 14px 20px;
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 12px 20px;
             border-radius: 50px;
             z-index: 2000;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             font-weight: 600;
             font-size: 14px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: toastEnter 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            animation: toastEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             color: var(--white);
+            white-space: nowrap;
+            max-width: calc(100vw - 48px);
         }
 
-        .toast-success i {
-            color: var(--emerald);
+        .toast-success {
+            border-color: rgba(46, 204, 113, 0.4);
         }
 
-        .toast-warning i {
-            color: var(--warning);
+        .toast-warning {
+            border-color: rgba(255, 184, 77, 0.4);
         }
 
-        .toast-info i {
-            color: var(--info);
+        .toast-info {
+            border-color: rgba(52, 152, 219, 0.4);
+        }
+
+        .toast-danger {
+            border-color: rgba(255, 77, 77, 0.4);
         }
 
         @keyframes toastEnter {
             from {
                 opacity: 0;
-                transform: translate(-50%, -20px);
+                transform: translate(-50%, 20px);
             }
 
             to {
@@ -1302,6 +1451,270 @@
             height: 48px;
             border-radius: 12px;
         }
+
+        /* --- V2 PREMIUM NEW CSS --- */
+
+        /* User Profile Avatar in Header */
+        .profile-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .profile-avatar:active {
+            transform: scale(0.95);
+        }
+
+
+
+        /* Animated Radial FAB Menu */
+        .fab-container {
+            position: relative;
+            z-index: 101;
+            display: flex;
+            justify-content: center;
+        }
+
+        .fab-menu {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 16px;
+            pointer-events: none;
+        }
+
+        .fab-menu.open {
+            pointer-events: auto;
+        }
+
+        .fab-action {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            opacity: 0;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            margin-left: -27px;
+            /* Half of width 54px */
+            margin-bottom: -27px;
+            transform: translate(0, 0) scale(0.5);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .fab-menu.open .fab-action {
+            opacity: 1;
+        }
+
+        /* Curved Arc Animation */
+        .fab-menu.open .fab-action:nth-child(1) {
+            transform: translate(-70px, -60px) scale(1);
+            transition-delay: 0.05s;
+        }
+
+        .fab-menu.open .fab-action:nth-child(2) {
+            transform: translate(0, -100px) scale(1);
+            transition-delay: 0.1s;
+        }
+
+        .fab-menu.open .fab-action:nth-child(3) {
+            transform: translate(70px, -60px) scale(1);
+            transition-delay: 0.15s;
+        }
+
+        .action-expense {
+            background: linear-gradient(135deg, #ff4d4d, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .action-income {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .action-transfer {
+            background: linear-gradient(135deg, #F39C12, #D35400);
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+        }
+
+        .fab-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(8, 15, 30, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .fab-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .fab-icon-rotator {
+            transition: transform 0.3s;
+        }
+
+        .fab-open-true>.fab-icon-rotator {
+            transform: rotate(135deg);
+        }
+
+        /* Category Envelopes (Advanced Budgets) */
+        .envelope-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-dim);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .env-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        /* Category Color Dot */
+        .cat-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Goal Ring SVG */
+        .goal-ring-wrap {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+        }
+
+        .goal-ring-wrap svg {
+            transform: rotate(-90deg);
+        }
+
+        .goal-ring-num {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+
+        /* Insights Card */
+        .insight-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-dim);
+        }
+
+        .insight-row:last-child {
+            border-bottom: none;
+        }
+
+        .insight-bar-wrap {
+            flex: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .insight-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Sparkline */
+        .sparkline-wrap {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 28px;
+        }
+
+        .spark-bar {
+            flex: 1;
+            border-radius: 3px 3px 0 0;
+            background: rgba(243, 156, 18, 0.35);
+            transition: height 0.6s ease;
+            min-height: 3px;
+        }
+
+        .spark-bar.current {
+            background: var(--gold);
+        }
+
+        /* Progress bar container for 50/30/20 */
+        .progress-bar-container {
+            height: 8px;
+            border-radius: 100px;
+            overflow: hidden;
+            margin: 8px 0 0 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .split-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .split-item {
+            margin-bottom: 4px;
+        }
+
+        /* Greeting badge */
+        .greeting-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(243, 156, 18, 0.1);
+            border: 1px solid rgba(243, 156, 18, 0.25);
+            border-radius: 50px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gold);
+            font-family: var(--font-head);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 
@@ -1379,19 +1792,19 @@
 
         // Categorii Premium
         const CATEGORIES_DEFAULT = [
-            { id: 'supermarket', icon: 'ShoppingCart', name: 'Supermarket & Alimente' },
-            { id: 'utilitati', icon: 'Lightbulb', name: 'Facturi & Utilități' },
-            { id: 'chirie', icon: 'Home', name: 'Chirie & Rate' },
-            { id: 'transport', icon: 'Car', name: 'Transport & Auto' },
-            { id: 'sanatate', icon: 'HeartPulse', name: 'Sănătate & Farmacie' },
-            { id: 'haine', icon: 'Shirt', name: 'Haine & Shopping' },
-            { id: 'restaurant', icon: 'Utensils', name: 'Restaurant & Ieșiri' },
-            { id: 'educatie', icon: 'GraduationCap', name: 'Educație & Cursuri' },
-            { id: 'vacante', icon: 'Plane', name: 'Vacanțe & Timp Liber' },
-            { id: 'copii', icon: 'Baby', name: 'Copii & Familie' },
-            { id: 'economii', icon: 'PiggyBank', name: 'Economii & Investiții' },
-            { id: 'altele', name: 'Altele', icon: 'MoreHorizontal', color: '#95A5A6' },
-            { id: 'factura_recurenta', name: 'Factură/Rată', icon: 'Repeat', color: '#8E44AD' }
+            { id: 'supermarket', icon: 'ShoppingCart', name: 'Supermarket & Alimente', color: '#27ae60' },
+            { id: 'utilitati', icon: 'Lightbulb', name: 'Facturi & Utilități', color: '#f39c12' },
+            { id: 'chirie', icon: 'Home', name: 'Chirie & Rate', color: '#8e44ad' },
+            { id: 'transport', icon: 'Car', name: 'Transport & Auto', color: '#e67e22' },
+            { id: 'sanatate', icon: 'HeartPulse', name: 'Sănătate & Farmacie', color: '#e74c3c' },
+            { id: 'haine', icon: 'Shirt', name: 'Haine & Shopping', color: '#d35400' },
+            { id: 'restaurant', icon: 'Utensils', name: 'Restaurant & Ieșiri', color: '#16a085' },
+            { id: 'educatie', icon: 'GraduationCap', name: 'Educație & Cursuri', color: '#2980b9' },
+            { id: 'vacante', icon: 'Plane', name: 'Vacanțe & Timp Liber', color: '#f1c40f' },
+            { id: 'copii', icon: 'Baby', name: 'Copii & Familie', color: '#ff9ff3' },
+            { id: 'economii', icon: 'PiggyBank', name: 'Economii & Investiții', color: '#2ecc71' },
+            { id: 'factura_recurenta', icon: 'Receipt', name: 'Facturi Fixe & Rate', color: '#e67e22' },
+            { id: 'altele', icon: 'HelpCircle', name: 'Alte Cheltuieli', color: '#95a5a6' }
         ];
 
         // Bugete specifice pieței din România
@@ -1400,6 +1813,15 @@
             { name: 'Salariul Mediu', income: 5000 },
             { name: 'Profesionist', income: 8000 },
             { name: 'Expert / IT', income: 15000 }
+        ];
+
+        // Tipuri Portofele (Wallets) V2
+        const WALLET_TYPES = [
+            { id: 'cash', name: 'Portofel Cash', icon: 'Wallet', class: 'wallet-type-cash' },
+            { id: 'bank', name: 'Cont Curent Banca', icon: 'Landmark', class: 'wallet-type-bank' },
+            { id: 'card', name: 'Card Cumpărături', icon: 'CreditCard', class: 'wallet-type-credit' },
+            { id: 'revolut', name: 'Cont Revolut', icon: 'SmartphoneNfc', class: 'wallet-type-crypto' },
+            { id: 'savings', name: 'Cont Economii', icon: 'PiggyBank', class: 'wallet-type-savings' },
         ];
 
         const QUOTES = [
@@ -1491,19 +1913,26 @@
                             transition: isDragging ? 'none' : 'transform 0.2s ease-out',
                             position: 'relative',
                             zIndex: 1,
-                            margin: 0
+                            margin: 0,
+                            background: 'var(--bg)',
+                            borderRadius: '16px'
                         }}
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                     >
-                        <div className="item-icon"><Icon name={cat.icon} /></div>
+                        <div className="item-icon" style={{ background: 'rgba(255,255,255,0.05)', color: expense.type === 'income' ? 'var(--emerald)' : (expense.type === 'transfer' ? 'var(--blue)' : 'var(--gold)') }}><Icon name={expense.type === 'transfer' ? 'RefreshCw' : cat.icon} /></div>
                         <div className="item-details">
-                            <div className="item-title">{expense.name}</div>
-                            <div className="item-subtitle">{cat.name}</div>
+                            <div className="item-title" style={{ color: '#e2e8f0', fontSize: '15px' }}>{expense.name}</div>
+                            <div className="item-subtitle" style={{ color: '#94a3b8', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span>{cat.name}</span>
+                            </div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div className="item-amount">-{expense.amount} <span style={{ fontSize: '12px', color: 'var(--gray)' }}>RON</span></div>
+                        <div style={{ textAlign: 'right', zIndex: 2 }}>
+                            <div className="item-amount" style={{ color: expense.type === 'income' ? 'var(--emerald)' : (expense.type === 'transfer' ? 'var(--blue)' : '#ffffff') }}>
+                                {expense.type === 'income' ? '+' : (expense.type === 'transfer' ? '' : '-')}
+                                {Math.abs(expense.amount)} <span style={{ fontSize: '12px', color: '#94a3b8' }}>RON</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1513,14 +1942,26 @@
         function App() {
             // Core State
             const [activeTab, setActiveTab] = useState('home');
-            const [isAddModalOpen, setIsAddModalOpen] = useState(false);
             const [currentMonth, setCurrentMonth] = useState(new Date());
 
             // Data State
             const [income, setIncome] = useState('');
+            const [incomes, setIncomes] = useState([]); // Array of income objects { id, source, amount, date }
             const [expenses, setExpenses] = useState([]);
             const [subs, setSubs] = useState([]); // Subscriptions
             const [dataStore, setDataStore] = useState({});
+
+            // Goals State
+            const [goals, setGoals] = useState([]);
+            const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+            const [newGoalName, setNewGoalName] = useState('');
+            const [newGoalAmount, setNewGoalAmount] = useState('');
+            const [newGoalDate, setNewGoalDate] = useState('');
+
+            // Transfer Rollover State
+            const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+            const [transferAmount, setTransferAmount] = useState(0);
+            const [selectedGoalId, setSelectedGoalId] = useState('');
 
             // Features
             const [dailyQuote, setDailyQuote] = useState('');
@@ -1530,6 +1971,7 @@
             const [isAddSubOpen, setIsAddSubOpen] = useState(false);
             const [addedExpenseId, setAddedExpenseId] = useState(null);
             const [isAddingSuccess, setIsAddingSuccess] = useState(false);
+            const [showStreakPopup, setShowStreakPopup] = useState(false);
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
             const fileInputRef = useRef(null);
@@ -1545,6 +1987,25 @@
             const [isSettingPin, setIsSettingPin] = useState(false);
             const [tempPin, setTempPin] = useState('');
             const [isBlurred, setIsBlurred] = useState(false);
+
+            // --- V2 Premium State ---
+            const [userProfile, setUserProfile] = useState({ name: 'Utilizator', avatar: null, currency: 'RON' });
+
+
+
+            // Category Budgets (Envelopes): { categoryId: limitNum }
+            const [categoryLimits, setCategoryLimits] = useState({});
+
+            // UI States for V2
+            const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
+            const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+            const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+            const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+            const [transactionType, setTransactionType] = useState('expense'); // 'expense' | 'income'
+            const [editIncomeId, setEditIncomeId] = useState(null);
+            const [newIncomeSource, setNewIncomeSource] = useState('');
+            const [newIncomeAmount, setNewIncomeAmount] = useState('');
+
 
             // Notifications Note: HTML5 Notifications API require HTTPS and explicit user permissions. 
             // Since this runs offline, push notifications aren't natively reliable without a registered ServiceWorker.
@@ -1617,7 +2078,7 @@
                 };
                 document.addEventListener('visibilitychange', handleVisibilityChange);
 
-                // Load local storage
+                // Load local storage completely for V2
                 try {
                     const saved = window.localStorage ? window.localStorage.getItem('IAI_Planner_V2') : null;
                     if (saved) {
@@ -1625,6 +2086,13 @@
                             const parsed = JSON.parse(saved);
                             setDataStore(parsed.dataStore || {});
                             if (parsed.subs) setSubs(parsed.subs);
+                            if (parsed.goals) setGoals(parsed.goals);
+
+                            // V2 Premium Loading
+                            if (parsed.userProfile) setUserProfile(parsed.userProfile);
+                            if (parsed.incomes) setIncomes(parsed.incomes);
+                            if (parsed.categoryLimits) setCategoryLimits(parsed.categoryLimits);
+
                         } catch (e) {
                             console.error('Error loading data', e);
                         }
@@ -1656,20 +2124,33 @@
                 return { start, end };
             };
 
-            const saveState = (inc, exps) => {
-                const mKey = getMonthKey(currentMonth);
-                const newDataStore = { ...dataStore, [mKey]: { income: inc, expenses: exps } };
+            const saveState = (inc, exps, targetMKey = null) => {
+                const mKey = targetMKey || getMonthKey(currentMonth);
+                const prevMonthData = dataStore[mKey] || {};
+                const newDataStore = { ...dataStore, [mKey]: { ...prevMonthData, income: inc, expenses: exps } };
                 setDataStore(newDataStore);
                 try {
                     if (window.localStorage) {
                         const existingSaved = window.localStorage.getItem('IAI_Planner_V2');
-                        const parsed = existingSaved ? JSON.parse(existingSaved) : { subs: [] };
+                        const parsed = existingSaved ? JSON.parse(existingSaved) : { subs: [], userProfile, dataStore: {}, categoryLimits };
                         parsed.dataStore = newDataStore;
                         window.localStorage.setItem('IAI_Planner_V2', JSON.stringify(parsed));
                     }
                 } catch (e) {
                     console.error('LocalStorage save failed', e);
                 }
+            };
+
+            // Core save method for the global app state container
+            const saveGlobalState = (updates) => {
+                try {
+                    if (window.localStorage) {
+                        const existingSaved = window.localStorage.getItem('IAI_Planner_V2');
+                        const parsed = existingSaved ? JSON.parse(existingSaved) : { dataStore, subs, goals };
+                        const newState = { ...parsed, ...updates };
+                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify(newState));
+                    }
+                } catch (e) { console.error('LocalStorage global save failed', e); }
             };
 
             const saveSubs = (newSubs) => {
@@ -1684,6 +2165,24 @@
                 } catch (e) {
                     console.error('LocalStorage subs save failed', e);
                 }
+            };
+
+            const deleteSub = (id) => {
+                const updated = subs.filter(s => s.id !== id);
+                saveSubs(updated);
+                showToast('Abonament eliminat.', 'info');
+            };
+
+            const saveGoals = (newGoals) => {
+                setGoals(newGoals);
+                try {
+                    if (window.localStorage) {
+                        const existingSaved = window.localStorage.getItem('IAI_Planner_V2');
+                        const parsed = existingSaved ? JSON.parse(existingSaved) : {};
+                        parsed.goals = newGoals;
+                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify(parsed));
+                    }
+                } catch (e) { }
             };
 
             // Forms handling
@@ -1806,8 +2305,8 @@
             }, [currentMonth, dataStore, subs]);
 
             const handleIncomeChange = (val) => {
-                setIncome(val);
-                saveState(val, expenses);
+                // Redundant with new incomes array system, but keeping stub for safety if called
+                console.log("handleIncomeChange is deprecated. Use incomes array.");
             };
 
             const handleAddExpense = (e) => {
@@ -1818,40 +2317,36 @@
                 }
 
                 const amount = parseFloat(newExpenseAmount);
+                if (amount <= 0 || isNaN(amount)) {
+                    showToast('Suma adăugată trebuie să fie minim 0.01.', 'warning');
+                    return;
+                }
 
-                // Fix: JS .toISOString() uses UTC. Late night inputs (e.g. 11 PM GMT+2) shift to the next day.
-                // We must construct an ISO string from LOCAL time to strictly match the scroller logic.
                 let activeDateObj = newExpenseDate ? new Date(newExpenseDate) : new Date();
                 const tzOffset = activeDateObj.getTimezoneOffset() * 60000;
                 const localISOTime = (new Date(activeDateObj - tzOffset)).toISOString().slice(0, -1);
-                const activeDateString = localISOTime;
 
                 const expenseItem = {
                     id: Date.now(),
                     name: newExpenseName,
                     amount: amount,
+                    type: 'expense',
                     categoryId: newExpenseCat,
-                    date: activeDateString,
+                    date: localISOTime,
                     isManualDate: !!newExpenseDate
                 };
 
-                const targetMKey = getMonthKey(new Date(activeDateString));
-
+                const targetMKey = getMonthKey(new Date(localISOTime));
                 if (targetMKey === getMonthKey(currentMonth)) {
                     const updatedList = [expenseItem, ...expenses];
                     setExpenses(updatedList);
                     saveState(income, updatedList);
                 } else {
-                    const targetMonthData = dataStore[targetMKey] || { income: '', expenses: [] };
+                    const targetMonthData = dataStore[targetMKey] || { income: 0, expenses: [] };
                     const updatedTargetExps = [expenseItem, ...(targetMonthData.expenses || [])];
                     const newDataStore = { ...dataStore, [targetMKey]: { ...targetMonthData, expenses: updatedTargetExps } };
                     setDataStore(newDataStore);
-                    if (window.localStorage) {
-                        const existingSaved = window.localStorage.getItem('IAI_Planner_V2');
-                        const parsed = existingSaved ? JSON.parse(existingSaved) : { subs: [], dataStore: {} }; // Ensure dataStore exists
-                        parsed.dataStore = newDataStore;
-                        window.localStorage.setItem('IAI_Planner_V2', JSON.stringify(parsed));
-                    }
+                    saveGlobalState({ dataStore: newDataStore });
                 }
 
                 setNewExpenseName('');
@@ -1861,19 +2356,19 @@
 
                 // Phase 8 WOW: Trigger Success Animations
                 setIsAddingSuccess(true);
-                triggerHaptic([100, 50, 100]); // Strong haptic validation
+                triggerHaptic([100, 50, 100]);
                 setAddedExpenseId(expenseItem.id);
 
                 setTimeout(() => {
                     setIsAddingSuccess(false);
-                    setIsAddModalOpen(false);
-                    setTimeout(() => setAddedExpenseId(null), 1200); // Let the CSS glow fade out on the item naturally
-                }, 1000); // 1s Checkmark visibility
+                    setIsExpenseModalOpen(false); // V2 named
+                    setTimeout(() => setAddedExpenseId(null), 1200);
+                }, 1000);
 
-                // Update Gamification Streak
+                // Gamification Streak update remains...
                 const todayStr = new Date().toDateString();
                 const savedLastLog = window.localStorage ? window.localStorage.getItem('IAI_Planner_LastLog') : null;
-                if (savedLastLog !== todayStr) {
+                if (savedLastLog !== todayStr && transactionType === 'expense') {
                     const newStreak = currentStreak + 1;
                     setCurrentStreak(newStreak);
                     if (window.localStorage) {
@@ -1883,14 +2378,31 @@
                 }
             };
 
+            // Fix Delete logic to restore Wallet balance
+            const deleteExpense = (id) => {
+                const updated = expenses.filter(e => e.id !== id);
+                setExpenses(updated);
+                // Correctly save to current month state
+                const mKey = getMonthKey(currentMonth);
+                const prevMonthData = dataStore[mKey] || {};
+                saveState(prevMonthData.income || 0, updated);
+            };
+
             const [newSubName, setNewSubName] = useState('');
             const [newSubAmount, setNewSubAmount] = useState('');
 
             const handleAddSub = (e) => {
                 e.preventDefault();
-                if (!newSubName || !newSubAmount) return;
+                if (!newSubName || !newSubAmount) {
+                    showToast('Completează ambele câmpuri pentru abonament.', 'warning');
+                    return;
+                }
 
                 const amount = parseFloat(newSubAmount);
+                if (amount <= 0 || isNaN(amount)) {
+                    showToast('Abonamentul trebuie să fie minim 0.01 RON.', 'warning');
+                    return;
+                }
                 const subItem = {
                     id: Date.now(),
                     name: newSubName,
@@ -1906,30 +2418,188 @@
                 showToast('Abonament setat cu succes!', 'success');
             };
 
-            const deleteExpense = (id) => {
-                const updatedList = expenses.filter(e => e.id !== id);
-                setExpenses(updatedList);
-                saveState(income, updatedList);
-                showToast('Cheltuială ștearsă!', 'info');
-                triggerHaptic([50, 30, 50]); // Feedback dublu pt ștergere
+            const handleAddGoal = (e) => {
+                e.preventDefault();
+                if (!newGoalName || !newGoalAmount) {
+                    showToast('Completează ambele câmpuri pentru obiectiv.', 'warning');
+                    return;
+                }
+                const amount = parseFloat(newGoalAmount);
+                if (amount <= 0 || isNaN(amount)) {
+                    showToast('Suma țintă trebuie să fie mai mare ca 0.', 'warning');
+                    return;
+                }
+                const goal = {
+                    id: Date.now(),
+                    name: newGoalName,
+                    targetAmount: amount,
+                    currentSavedAmount: 0,
+                    targetDate: newGoalDate || null,
+                    icon: 'Target'
+                };
+                saveGoals([...goals, goal]);
+                setNewGoalName('');
+                setNewGoalAmount('');
+                setNewGoalDate('');
+                setIsAddGoalOpen(false);
+                showToast('Obiectiv salvat cu succes!', 'success');
+                triggerHaptic([50, 50]);
+            };
+
+            const handleTransferToGoal = (e) => {
+                e.preventDefault();
+                if (!selectedGoalId || !transferAmount) return;
+
+                const amount = parseFloat(transferAmount);
+                if (amount <= 0 || isNaN(amount)) {
+                    showToast('Suma trebuie să fie validă.', 'warning');
+                    return;
+                }
+
+                const d = new Date(selectedDate);
+                d.setHours(new Date().getHours());
+                d.setMinutes(new Date().getMinutes());
+
+                const newExp = {
+                    id: Date.now() + Math.random(),
+                    name: `Economii pt. Obiectiv`,
+                    amount: amount,
+                    categoryId: 'investitii_economii',
+                    date: d.toISOString()
+                };
+
+                const targetMKey = getMonthKey(d);
+                if (targetMKey === getMonthKey(currentMonth)) {
+                    const updatedExps = [newExp, ...expenses];
+                    setExpenses(updatedExps);
+                    // Use totalIncome or fallback to current income state
+                    const actualInc = totalIncome || income;
+                    saveState(actualInc, updatedExps);
+                } else {
+                    const targetMonthData = dataStore[targetMKey] || { income: '', expenses: [] };
+                    const updatedTargetExps = [newExp, ...(targetMonthData.expenses || [])];
+                    const newDataStore = { ...dataStore, [targetMKey]: { ...targetMonthData, expenses: updatedTargetExps } };
+                    setDataStore(newDataStore);
+                    saveGlobalState({ dataStore: newDataStore });
+                }
+
+                let goalName = '';
+                const updatedGoals = goals.map(g => {
+                    if (g.id.toString() === selectedGoalId.toString()) {
+                        goalName = g.name;
+                        return { ...g, currentSavedAmount: g.currentSavedAmount + amount };
+                    }
+                    return g;
+                });
+                saveGoals(updatedGoals);
+
+                setIsTransferModalOpen(false);
+                setTransferAmount('');
+                setSelectedGoalId('');
+
+                showToast(`Ai pus deoparte ${amount.toFixed(0)} RON pentru ${goalName}! 🎯`, 'success');
+                triggerHaptic([100, 50, 100]);
             };
 
             // Math Logic
-            const totalIncome = parseFloat(income || 0);
-            const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-            const remaining = totalIncome - totalExpenses;
-            let spendPercentage = 0;
-            if (totalIncome > 0) {
-                spendPercentage = Math.min((totalExpenses / totalIncome) * 100, 100);
-            }
+            const totalIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
+            const totalFixed = subs.reduce((sum, s) => sum + s.amount, 0);
+            const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const remaining = totalIncome - totalFixed - totalExpenses;
+
+            // Currency formatter
+            const fmt = (n) => {
+                if (n === undefined || n === null || isNaN(n)) return '0';
+                const abs = Math.abs(n);
+                if (abs >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+                return Number(n.toFixed(0)).toLocaleString('ro-RO');
+            };
+
+            // Greeting based on time of day
+            const getGreeting = () => {
+                const h = new Date().getHours();
+                if (h < 12) return { text: 'Bună dimineața', emoji: '☀️' };
+                if (h < 18) return { text: 'Bună ziua', emoji: '🌤️' };
+                return { text: 'Bună seara', emoji: '🌙' };
+            };
+            const greeting = getGreeting();
 
             // Health Logic
+            let spendPercentage = 0;
+            if (totalIncome > 0) {
+                spendPercentage = Math.min((totalExpenses / Math.max(totalIncome - totalFixed, 1)) * 100, 100);
+            }
+
             let healthStatus = { msg: "Balanță Zen", class: "status-safe", fill: "fill-safe", icon: "Smile" };
             if (spendPercentage >= 90) {
                 healthStatus = { msg: "Critic", class: "status-danger", fill: "fill-danger", icon: "AlertTriangle" };
             } else if (spendPercentage >= 75) {
                 healthStatus = { msg: "Atenție", class: "status-warn", fill: "fill-warn", icon: "AlertCircle" };
             }
+
+            // --- V2 Premium: Profile & Wallet Handlers ---
+            const [editProfileName, setEditProfileName] = useState(userProfile.name);
+
+            const handleProfileImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setUserProfile(prev => ({ ...prev, avatar: reader.result }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleSaveProfile = (e) => {
+                e.preventDefault();
+                const newProfile = { ...userProfile, name: editProfileName };
+                setUserProfile(newProfile);
+                saveGlobalState({ userProfile: newProfile });
+                setIsProfileModalOpen(false);
+                showToast('Profil actualizat!', 'success');
+            };
+
+            const handleAddIncome = (e) => {
+                e.preventDefault();
+                if (!newIncomeSource || !newIncomeAmount) return showToast('Sursă și sumă obligatorii!', 'warning');
+
+                const amount = parseFloat(newIncomeAmount);
+                if (isNaN(amount)) return showToast('Sumă invalidă!', 'error');
+
+                let updatedIncomes;
+                if (editIncomeId) {
+                    updatedIncomes = incomes.map(inc => inc.id === editIncomeId ? { ...inc, source: newIncomeSource, amount: amount } : inc);
+                    showToast('Venit actualizat!', 'success');
+                } else {
+                    const newIncome = {
+                        id: 'inc_' + Date.now(),
+                        source: newIncomeSource,
+                        amount: amount,
+                        date: new Date().toISOString()
+                    };
+                    updatedIncomes = [...incomes, newIncome];
+                    showToast('Venit adăugat!', 'success');
+                }
+
+                setIncomes(updatedIncomes);
+                saveGlobalState({ incomes: updatedIncomes });
+
+                setNewIncomeSource('');
+                setNewIncomeAmount('');
+                setEditIncomeId(null);
+                setIsIncomeModalOpen(false);
+            };
+
+            const deleteIncome = (id) => {
+                if (confirm('Ștergi această sursă de venit?')) {
+                    const updated = incomes.filter(inc => inc.id !== id);
+                    setIncomes(updated);
+                    saveGlobalState({ incomes: updated });
+                    showToast('Venit eliminat.', 'info');
+                }
+            };
+            // ---------------------------------------------
 
             // Daily Allowance Intel Engine
             const today = new Date();
@@ -1942,9 +2612,9 @@
             const allowancePerDay = daysLeft > 0 && remaining > 0 ? (remaining / daysLeft).toFixed(0) : 0;
 
             // Financial Allocator (50/30/20)
-            const needsCat = ['supermarket', 'utilitati', 'chirie', 'transport', 'sanatate', 'educatie', 'copii'];
+            const needsCat = ['supermarket', 'utilitati', 'chirie', 'transport', 'sanatate', 'educatie', 'copii', 'factura_recurenta'];
             const wantsCat = ['haine', 'restaurant', 'vacante', 'vicii', 'altele'];
-            const savingsCat = ['economii'];
+            const savingsCat = ['economii', 'investitii_economii'];
 
             const spentNeeds = expenses.filter(e => needsCat.includes(e.categoryId)).reduce((sum, e) => sum + e.amount, 0);
             const spentWants = expenses.filter(e => wantsCat.includes(e.categoryId)).reduce((sum, e) => sum + e.amount, 0);
@@ -1962,7 +2632,7 @@
             let globalSavings = 0;
             Object.values(dataStore).forEach(monthData => {
                 const mExps = monthData.expenses || [];
-                globalSavings += mExps.filter(e => e.categoryId === 'economii').reduce((s, e) => s + e.amount, 0);
+                globalSavings += mExps.filter(e => savingsCat.includes(e.categoryId)).reduce((s, e) => s + e.amount, 0);
             });
 
             let userRankName = "Începător Banii";
@@ -1976,28 +2646,49 @@
             // AI Offline Insights Generator & Allocation Engine
             let aiMessage = "Balanța ta arată bine! Adaugă cheltuieli pentru a primi analize avansate din partea IAI.";
             let aiIcon = "Cpu";
-            let recommendedSavings = 0;
-            let recommendedInvestments = 0;
-            let recommendedBuffer = 0;
+
+            let recNeeds = Math.max(0, targetNeeds - spentNeeds);
+            let recWants = Math.max(0, targetWants - spentWants);
+            let recSavings = Math.max(0, targetSavings - spentSavings);
 
             if (totalIncome > 0) {
                 const totalFixed = subs.reduce((sum, s) => sum + s.amount, 0);
-                // "totalExpenses" variable already includes what was actually spent this month
-                const cashRemaining = totalIncome - totalFixed - totalExpenses;
+                const cashRemaining = totalIncome - totalExpenses;
 
                 if (cashRemaining > 0) {
-                    // Logic requested by user: "how much to put aside for savings, investments, etc."
-                    recommendedSavings = cashRemaining * 0.40; // 40% into emergency/short term
-                    recommendedInvestments = cashRemaining * 0.40; // 40% into stocks/long term
-                    recommendedBuffer = cashRemaining * 0.20; // 20% keep in account for buffer
+                    aiMessage = `Ai cheltuit ${(totalExpenses).toFixed(0)} RON din bugetul tău lunar. Pentru a genera avere în ritm accelerat, îți mai rămân de distribuit ${cashRemaining.toFixed(0)} RON. Respectă strict alocarea 50/30/20 recomandată mai jos.`;
 
-                    aiMessage = `Din salariul tău, ai cheltuit și blocat în facturi **${(totalFixed + totalExpenses).toFixed(0)} RON**. Din cei **${cashRemaining.toFixed(0)} RON** rămași pe luna aceasta, IAI îți recomandă să îi distribui inteligent pentru a genera avere.`;
+                    if (recNeeds === 0 && recWants === 0) {
+                        aiMessage = `Ai atins limitele pentru necesități și dorințe! Orice ban din cei ${cashRemaining.toFixed(0)} RON rămași ar trebui direcționat integral spre economii sau investiții.`;
+                    }
                     aiIcon = "TrendingUp";
                 } else {
-                    aiMessage = `Ești pe minus sau pe zero cu bugetul lunar ({cashRemaining.toFixed(0)} RON rămași). IAI recomandă tăierea cheltuielilor neesențiale urgent!`;
+                    aiMessage = `Ești pe minus sau pe zero! Taie urgent din cheltuielile neesențiale (dorințe).`;
                     aiIcon = "AlertTriangle";
+                    recNeeds = 0; recWants = 0; recSavings = 0;
                 }
             }
+
+            // V2 Premium: External LLM Prompt Generator (ChatGPT/Gemini)
+            const generateAIContext = () => {
+                const recentExps = [...expenses].slice(0, 30).map(e => `- ${e.name} (${e.amount} RON) - ${CATEGORIES_DEFAULT.find(c => c.id === e.categoryId)?.name || 'Altele'}`).join('\n');
+                const incomeData = incomes.map(inc => `- ${inc.source}: ${inc.amount} RON`).join('\n');
+
+                const prompt = `Salut! Sunt un consultant financiar AI. Aici sunt datele mele curente extrase din aplicația mea de buget:\n\n` +
+                    `💰 VENIT TOTAL: ${totalIncome} RON\n` +
+                    `💵 SURSE VENIT:\n${incomeData}\n\n` +
+                    `📑 COSTURI FIXE (Facturi): ${totalFixed} RON\n` +
+                    `📊 REPARTIZARE 50/30/20 LUNA ASTA:\n` +
+                    `- Necesități (Target ${targetNeeds} RON): Cheltuit ${spentNeeds} RON\n` +
+                    `- Dorințe (Target ${targetWants} RON): Cheltuit ${spentWants} RON\n` +
+                    `- Economii/Investiții (Target ${targetSavings} RON): Salvat/Investit ${spentSavings} RON\n\n` +
+                    `💸 ULTIMELE 30 TRANZACȚII:\n${recentExps || 'Fără tranzacții'}\n\n` +
+                    `🎯 OBIECTIVE ACTIVE:\n${goals.map(g => `- ${g.name}: ${g.currentSavedAmount}/${g.targetAmount} RON`).join('\n') || 'Niciun obiectiv'}\n\n` +
+                    `Te rog să acționezi ca un consultant financiar extrem de strict și direct. Analizează aceste date și spune-mi în limba română (maxim 3 paragrafe):\n1. Ce fac bine?\n2. Unde pierd bani inutil analizând tranzacțiile mele?\n3. Ce mutări tactice îmi recomanzi azi pentru a-mi atinge obiectivele mai repede?`;
+
+                navigator.clipboard.writeText(prompt);
+                showToast('Prompt AI Copiat! Lipește-l în ChatGPT/Gemini.', 'success');
+            };
 
             // Chart rendering
             useEffect(() => {
@@ -2006,25 +2697,56 @@
                     if (chartInstance.current) chartInstance.current.destroy();
 
                     const byCat = {};
+                    let totalVal = 0;
+
+                    // 1. Process Manual Expenses (Include auto-added subs which are now in expenses)
                     expenses.forEach(e => {
                         const c = CATEGORIES_DEFAULT.find(cat => cat.id === e.categoryId);
                         const name = c ? c.name : 'Altele';
                         byCat[name] = (byCat[name] || 0) + e.amount;
+                        totalVal += e.amount;
                     });
 
-                    const labels = Object.keys(byCat);
+                    // 2. Process Recurring Subs (Add those that are NOT already in current month's expenses)
+                    subs.forEach(s => {
+                        const amount = parseFloat(s.amount);
+                        // Check if this sub exists in current expenses (manual or auto)
+                        const exists = expenses.some(e =>
+                            (e.name.toLowerCase() === s.name.toLowerCase() || e.categoryId === 'factura_recurenta') &&
+                            Math.abs(e.amount - amount) < 0.1
+                        );
+
+                        if (!exists) {
+                            const name = 'Facturi Fixe & Rate';
+                            byCat[name] = (byCat[name] || 0) + amount;
+                            totalVal += amount;
+                        }
+                    });
+
+                    const rawLabels = Object.keys(byCat);
                     const data = Object.values(byCat);
 
-                    if (labels.length > 0) {
+                    // Add Percentages to labels
+                    const labelsWithPct = rawLabels.map((name, i) => {
+                        const pct = totalVal > 0 ? ((data[i] / totalVal) * 100).toFixed(1) : 0;
+                        return `${name} (${pct}%)`;
+                    });
+
+                    if (rawLabels.length > 0) {
                         Chart.defaults.color = '#BDC3C7';
                         chartInstance.current = new Chart(ctx, {
                             type: 'doughnut',
+                            plugins: [ChartDataLabels],
                             data: {
-                                labels: labels,
+                                labels: labelsWithPct,
                                 datasets: [{
                                     data: data,
-                                    backgroundColor: ['#F39C12', '#2ECC71', '#3498DB', '#E74C3C', '#9B59B6', '#1ABC9C', '#F1C40F', '#E67E22'],
+                                    backgroundColor: rawLabels.map(label => {
+                                        const cat = CATEGORIES_DEFAULT.find(c => c.name === label);
+                                        return cat ? cat.color : (label === 'Facturi Fixe & Rate' ? '#e67e22' : '#95a5a6');
+                                    }),
                                     borderWidth: 0,
+                                    borderRadius: 4,
                                     hoverOffset: 4
                                 }]
                             },
@@ -2032,12 +2754,46 @@
                                 responsive: true,
                                 maintainAspectRatio: false,
                                 cutout: '75%',
-                                plugins: { legend: { position: 'right', labels: { font: { family: 'Plus Jakarta Sans', size: 12 } } } }
+                                plugins: {
+                                    legend: {
+                                        position: 'right',
+                                        labels: {
+                                            font: { family: 'Plus Jakarta Sans', size: 10 },
+                                            padding: 10
+                                        }
+                                    },
+                                    datalabels: {
+                                        color: '#fff',
+                                        formatter: (value, ctx) => {
+                                            const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                            const percentage = (value * 100 / sum).toFixed(0);
+                                            return percentage > 3 ? percentage + "%" : "";
+                                        },
+                                        font: {
+                                            family: 'JetBrains Mono',
+                                            weight: '800',
+                                            size: 12
+                                        },
+                                        anchor: 'center',
+                                        align: 'center',
+                                        textShadowBlur: 4,
+                                        textShadowColor: 'rgba(0,0,0,0.5)'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                const label = context.label || '';
+                                                const value = context.raw || 0;
+                                                return `${label}: ${value} RON`;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         });
                     }
                 }
-            }, [activeTab, expenses]);
+            }, [activeTab, expenses, subs]);
 
             const toggleHelp = (index) => {
                 setOpenHelpIndex(prevIndex => prevIndex === index ? null : index);
@@ -2144,18 +2900,20 @@
 
             const selectedStr = selectedDate.toISOString().split('T')[0];
             const dayExps = cycleExps.filter(e => e.date.startsWith(selectedStr));
-            const dayTotal = dayExps.reduce((s, e) => s + e.amount, 0);
+            const dayTotal = dayExps.filter(e => e.categoryId !== 'factura_recurenta').reduce((s, e) => s + e.amount, 0);
 
-            const spentBefore = cycleExps.filter(e => new Date(e.date) >= cycleStart && new Date(e.date) < new Date(selectedDate).setHours(0, 0, 0, 0)).reduce((s, e) => s + e.amount, 0);
-            const cycleIncome = parseFloat(dataStore[mKey1]?.income || 0);
-            const totalFixed = subs.reduce((s, x) => s + x.amount, 0);
-            const budgetAtStartOfDay = cycleIncome - totalFixed - spentBefore;
+            const spentBefore = cycleExps.filter(e => new Date(e.date) >= cycleStart && new Date(e.date) < new Date(selectedDate).setHours(0, 0, 0, 0) && e.categoryId !== 'factura_recurenta').reduce((s, e) => s + e.amount, 0);
 
-            const daysLeftInCycle = Math.ceil((cycleEnd - new Date(selectedDate).setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
+            const cycleIncome = totalIncome;
+            const cycleBudget = cycleIncome - totalFixed;
+
+            const totalDaysInCycle = Math.round((cycleEnd - cycleStart) / (1000 * 60 * 60 * 24)) + 1;
+            const fixedDailyAllowance = totalDaysInCycle > 0 ? (cycleBudget / totalDaysInCycle) : 0;
+            const currentDayInCycle = Math.round((new Date(selectedDate).setHours(0, 0, 0, 0) - cycleStart) / (1000 * 60 * 60 * 24)) + 1;
 
             let activeDailyBudget = 0;
-            if (daysLeftInCycle > 0) {
-                activeDailyBudget = parseFloat((budgetAtStartOfDay / daysLeftInCycle).toFixed(0));
+            if (currentDayInCycle > 0) {
+                activeDailyBudget = parseFloat(((fixedDailyAllowance * currentDayInCycle) - spentBefore).toFixed(0));
             }
 
             const cycleDaysArr = [];
@@ -2216,105 +2974,187 @@
                         </div>
                     )}
 
-                    {/* Header */}
+                    {/* Header V2 Premium */}
                     <div className="header">
                         <div className="brand-section">
-                            <div className="logo-box">IAI</div>
+                            {userProfile.avatar ? (
+                                <img src={userProfile.avatar} alt="Profile" className="profile-avatar" onClick={() => setIsProfileModalOpen(true)} />
+                            ) : (
+                                <div className="profile-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--card-bg), var(--midnight2))', color: 'var(--gold)', fontSize: '18px', fontWeight: 'bold' }} onClick={() => setIsProfileModalOpen(true)}>
+                                    {userProfile.name.charAt(0).toUpperCase()}
+                                </div>
+                            )}
                             <div className="brand-text">
-                                <p>Inginerul cu AI</p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <h1 style={{ margin: 0 }}>Bugetul Personal</h1>
-                                    <div style={{
-                                        background: currentStreak > 0 ? 'rgba(243, 156, 18, 0.15)' : 'rgba(255,255,255,0.05)',
-                                        color: currentStreak > 0 ? 'var(--gold)' : 'var(--dgray)',
-                                        padding: '2px 8px',
-                                        borderRadius: '12px',
-                                        fontSize: '11px',
-                                        fontWeight: 'bold',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '4px',
-                                        transition: 'all 0.3s ease'
-                                    }}>
-                                        <Icon name="Flame" className="lucide-sm" style={{ width: '12px', height: '12px' }} />
-                                        {currentStreak} {currentStreak === 1 ? 'zi' : 'zile'}
+                                <span className="greeting-badge">{greeting.emoji} {greeting.text}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px' }}>
+                                    <h1 style={{ margin: 0 }}>{userProfile.name}</h1>
+                                    <div
+                                        onClick={() => { if (currentStreak > 0) { setShowStreakPopup(true); triggerHaptic([50]); } }}
+                                        style={{
+                                            background: currentStreak > 0 ? 'rgba(243, 156, 18, 0.15)' : 'rgba(255,255,255,0.05)',
+                                            color: currentStreak > 0 ? 'var(--gold)' : 'var(--dgray)',
+                                            padding: '2px 8px',
+                                            borderRadius: '12px',
+                                            fontSize: '13px',
+                                            fontWeight: 'bold',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '4px',
+                                            cursor: currentStreak > 0 ? 'pointer' : 'default',
+                                            border: currentStreak > 0 ? '1px solid rgba(243, 156, 18, 0.3)' : '1px solid transparent'
+                                        }}>
+                                        <Icon name="Flame" className="lucide-sm" style={{ width: '14px', height: '14px', filter: currentStreak > 0 ? 'drop-shadow(0 0 4px rgba(243,156,18,0.8))' : 'none' }} />
+                                        <span>{currentStreak}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div className="month-selector">
-                            <button className="month-btn" onClick={() => {
-                                const n = new Date(currentMonth); n.setMonth(n.getMonth() - 1); setCurrentMonth(n);
-                            }}><Icon name="ChevronLeft" className="lucide-sm" /></button>
-
-                            <span className="month-label" style={{ textTransform: 'capitalize' }}>
-                                {formatMonthInfo(currentMonth).split(' ')[0].substring(0, 3)} '{String(currentMonth.getFullYear()).substring(2)}
-                            </span>
-
-                            <button className="month-btn" onClick={() => {
-                                const n = new Date(currentMonth); n.setMonth(n.getMonth() + 1); setCurrentMonth(n);
-                            }} disabled={currentMonth >= today && currentMonth.getMonth() >= today.getMonth()}><Icon name="ChevronRight" className="lucide-sm" /></button>
+                            {[-2, -1, 0, 1, 2, 3].map(offset => {
+                                const d = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+                                const isCurrent = d.getMonth() === currentMonth.getMonth() && d.getFullYear() === currentMonth.getFullYear();
+                                return (
+                                    <div key={offset} id={`pill-${d.getMonth()}`} className={`month-pill ${isCurrent ? 'active' : ''}`} onClick={() => { setCurrentMonth(d); document.getElementById(`pill-${d.getMonth()}`)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); }}>
+                                        {formatMonthInfo(d).split(' ')[0].substring(0, 3)} '{String(d.getFullYear()).substring(2)}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
                     {/* Navigation Logic */}
                     {activeTab === 'home' && (
                         <div className="content-section">
-                            {/* Salary Configuration & Overall Monthly Balance */}
-                            <div className="balance-card">
-                                <div className="progress-header">
-                                    <span className="balance-label">Balanță Lunară Rămasă</span>
-                                    {totalIncome > 0 && remaining > 0 && (
-                                        <div className="status-badge good">
-                                            <Icon name="TrendingUp" className="lucide-sm" />
-                                            Pozitiv
+                            {/* --- Premium Balance Card --- */}
+                            <div className="card" style={{
+                                background: 'linear-gradient(145deg, rgba(243,156,18,0.12) 0%, rgba(10,25,49,0.9) 60%)',
+                                border: '1px solid rgba(243, 156, 18, 0.25)',
+                                padding: '24px',
+                                marginBottom: '20px',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}>
+                                {/* Glowing orb */}
+                                <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '120px', height: '120px', background: 'var(--gold)', opacity: 0.06, borderRadius: '50%', filter: 'blur(40px)', pointerEvents: 'none' }} />
+                                <div style={{ fontSize: '11px', color: 'var(--gray)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '6px', fontWeight: 700 }}>Balanță Disponibilă</div>
+                                <div style={{ fontSize: '44px', fontWeight: '900', fontFamily: 'var(--font-mono)', color: remaining >= 0 ? 'var(--white)' : 'var(--danger)', letterSpacing: '-1px', lineHeight: 1, marginBottom: '4px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                                    {animRemaining}
+                                    <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--gray)' }}>RON</span>
+                                </div>
+                                {/* Spending bar */}
+                                {totalIncome > 0 && (
+                                    <div style={{ marginTop: '12px', marginBottom: '16px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--dgray)', marginBottom: '5px' }}>
+                                            <span>Cheltuieli din buget</span>
+                                            <span style={{ color: spendPercentage > 80 ? 'var(--danger)' : 'var(--gold)', fontWeight: 700 }}>{spendPercentage.toFixed(0)}%</span>
                                         </div>
-                                    )}
+                                        <div style={{ height: '6px', background: 'rgba(255,255,255,0.07)', borderRadius: '100px', overflow: 'hidden' }}>
+                                            <div style={{ height: '100%', width: `${spendPercentage}%`, background: spendPercentage > 80 ? 'linear-gradient(90deg,#c0392b,var(--danger))' : spendPercentage > 60 ? 'linear-gradient(90deg,#d35400,var(--gold))' : 'linear-gradient(90deg,#27ae60,var(--emerald))', borderRadius: '100px', transition: 'width 0.8s cubic-bezier(0.16,1,0.3,1)' }} />
+                                        </div>
+                                    </div>
+                                )}
+                                <div style={{ display: 'flex', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '14px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '10px', color: 'var(--dgray)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '3px' }}>Venit</div>
+                                        <div style={{ color: 'var(--emerald)', fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '16px' }}>+{fmt(totalIncome)}<span style={{ fontSize: '10px', fontWeight: 400, marginLeft: '2px' }}>RON</span></div>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '10px', color: 'var(--dgray)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '3px' }}>Facturi</div>
+                                        <div style={{ color: 'var(--danger)', fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '16px' }}>-{fmt(totalFixed)}<span style={{ fontSize: '10px', fontWeight: 400, marginLeft: '2px' }}>RON</span></div>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '10px', color: 'var(--dgray)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '3px' }}>Cheltuit</div>
+                                        <div style={{ color: 'var(--gold)', fontWeight: 800, fontFamily: 'var(--font-mono)', fontSize: '16px' }}>{fmt(totalExpenses)}<span style={{ fontSize: '10px', fontWeight: 400, marginLeft: '2px' }}>RON</span></div>
+                                    </div>
                                 </div>
-                                <div className="balance-amount">
-                                    {animRemaining} <span style={{ fontSize: '20px', color: 'var(--gray)' }}>RON</span>
-                                </div>
-                                <div className="progress-bar-container">
-                                    <div className="progress-bar" style={{ width: `${spendPercentage}%`, background: `var(--${healthStatus.fill.split('-')[1]})` }}></div>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: 'var(--gray)' }}>
-                                    <span>Cheltuit: {animTotalExpenses}</span>
-                                    <span style={{ color: `var(--${healthStatus.fill.split('-')[1]})` }}>{spendPercentage.toFixed(1)}%</span>
+                                {/* Daily Allowance Pill */}
+                                {allowancePerDay > 0 && (
+                                    <div style={{ marginTop: '14px', background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.25)', borderRadius: '50px', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                        <Icon name="CalendarCheck" className="lucide-sm" style={{ color: 'var(--emerald)' }} />
+                                        <span style={{ fontSize: '13px', color: 'var(--emerald)', fontWeight: 700 }}>Poți cheltui azi: <span style={{ fontFamily: 'var(--font-mono)', fontSize: '16px' }}>{allowancePerDay}</span> RON</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* --- Spending Insights (Top 3 Categories) --- */}
+                            {expenses.length > 0 && (() => {
+                                const catTotals = {};
+                                expenses.forEach(e => {
+                                    const c = CATEGORIES_DEFAULT.find(c => c.id === e.categoryId);
+                                    const name = c ? c.name : 'Altele';
+                                    const color = c ? c.color : '#95a5a6';
+                                    if (!catTotals[name]) catTotals[name] = { amount: 0, color };
+                                    catTotals[name].amount += e.amount;
+                                });
+                                const sorted = Object.entries(catTotals).sort((a, b) => b[1].amount - a[1].amount).slice(0, 3);
+                                const maxAmt = sorted[0]?.[1].amount || 1;
+                                return (
+                                    <div className="card" style={{ marginBottom: '20px', padding: '16px 20px' }}>
+                                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--gray)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Icon name="Zap" className="lucide-sm" style={{ color: 'var(--gold)' }} />
+                                            Top Cheltuieli Luna Asta
+                                        </div>
+                                        {sorted.map(([name, data]) => (
+                                            <div key={name} className="insight-row">
+                                                <div className="cat-dot" style={{ background: data.color }} />
+                                                <span style={{ fontSize: '13px', color: 'var(--white)', fontWeight: 600, minWidth: '120px' }}>{name.split(' ')[0]}</span>
+                                                <div className="insight-bar-wrap">
+                                                    <div className="insight-bar-fill" style={{ width: `${(data.amount / maxAmt) * 100}%`, background: data.color + 'cc' }} />
+                                                </div>
+                                                <span style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: 'var(--white)', fontWeight: 700, minWidth: '60px', textAlign: 'right' }}>{fmt(data.amount)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* --- Veniturile Mele Section --- */}
+                            <div className="section-title" style={{ marginTop: '0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Veniturile Mele</span>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <span style={{ fontSize: '12px', color: 'var(--gold)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => { setEditIncomeId(null); setNewIncomeSource('Salariu'); setNewIncomeAmount(''); setIsIncomeModalOpen(true); }}>
+                                        <Icon name="Target" className="lucide-sm" /> Salariu
+                                    </span>
+                                    <span style={{ fontSize: '12px', color: 'var(--gold)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => { setEditIncomeId(null); setNewIncomeSource(''); setNewIncomeAmount(''); setIsIncomeModalOpen(true); }}>
+                                        <Icon name="PlusCircle" className="lucide-sm" /> Extra
+                                    </span>
                                 </div>
                             </div>
 
-                            <div className="section-title">Ajustează Venitul (Lunar)</div>
-                            <div className="card">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                    <div className="item-icon" style={{ background: 'rgba(243, 156, 18, 0.1)', color: 'var(--gold)' }}>
-                                        <Icon name="Wallet" />
-                                    </div>
-                                    <input
-                                        type="number"
-                                        placeholder="Introdu suma..."
-                                        value={income}
-                                        onChange={(e) => handleIncomeChange(e.target.value)}
-                                        style={{ background: 'transparent', border: 'none', color: 'var(--white)', fontSize: '24px', fontWeight: 'bold', width: '100%', outline: 'none' }}
-                                    />
-                                    <span style={{ color: 'var(--gray)', fontWeight: 'bold' }}>RON</span>
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-                                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 10px', whiteSpace: 'nowrap' }} onClick={() => handleIncomeChange('3500')}>Minim</button>
-                                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 10px', whiteSpace: 'nowrap' }} onClick={() => handleIncomeChange('5000')}>Mediu</button>
-                                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 10px', whiteSpace: 'nowrap' }} onClick={() => handleIncomeChange('8000')}>Avansat</button>
-                                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 10px', whiteSpace: 'nowrap' }} onClick={() => handleIncomeChange('15000')}>Premium</button>
-                                </div>
+                            <div className="card" style={{ marginBottom: '24px' }}>
+                                {incomes.length === 0 ? (
+                                    <p style={{ color: 'var(--gray)', fontSize: '13px', textAlign: 'center', padding: '10px 0' }}>Nu ai adăugat nicio sursă de venit încă.</p>
+                                ) : (
+                                    incomes.map(inc => (
+                                        <div key={inc.id} className="list-item" style={{ background: 'rgba(255,255,255,0.02)', marginBottom: '8px' }}>
+                                            <div className="item-icon" style={{ background: 'rgba(46, 204, 113, 0.1)', color: '#2ECC71' }}>
+                                                <Icon name={inc.source.toLowerCase().includes('salariu') ? "Target" : "Banknote"} />
+                                            </div>
+                                            <div className="item-details" onClick={() => { setEditIncomeId(inc.id); setNewIncomeSource(inc.source); setNewIncomeAmount(inc.amount); setIsIncomeModalOpen(true); }} style={{ cursor: 'pointer' }}>
+                                                <div className="item-title">{inc.source}</div>
+                                                <div className="item-subtitle">{new Date(inc.date).toLocaleDateString('ro-RO')}</div>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div className="item-amount" style={{ color: '#2ECC71' }}>+{inc.amount} <span style={{ fontSize: '10px' }}>RON</span></div>
+                                                <span onClick={() => deleteIncome(inc.id)} style={{ color: 'var(--danger)', fontSize: '12px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                                                    <Icon name="Trash2" className="lucide-sm" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
 
                             {/* Facturi Section */}
-                            <div className="section-title" style={{ marginTop: '24px' }}>Facturi & Recurențe Lungi</div>
+                            <div className="section-title" style={{ marginTop: '0' }}>Facturi &amp; Recurențe Lunare</div>
                             <div className="card">
                                 {subs.length === 0 ? (
                                     <p style={{ color: 'var(--gray)', fontSize: '13px', textAlign: 'center', padding: '10px 0' }}>Nu ai adăugat abonamente fixe. Acestea se auto-deduc lunar.</p>
                                 ) : (
                                     subs.map(s => (
                                         <div key={s.id} className="list-item" style={{ background: 'rgba(255,255,255,0.02)', marginBottom: '8px' }}>
-                                            <div className="item-icon" style={{ background: 'rgba(52, 152, 219, 0.1)', color: '#3498DB' }}>
+                                            <div className="item-icon" style={{ background: 'rgba(52, 152, 219, 0.1)', color: 'var(--blue)' }}>
                                                 <Icon name="Repeat" />
                                             </div>
                                             <div className="item-details">
@@ -2322,16 +3162,16 @@
                                                 <div className="item-subtitle">Deducere Automată</div>
                                             </div>
                                             <div style={{ textAlign: 'right' }}>
-                                                <div className="item-amount" style={{ color: '#E74C3C' }}>-{s.amount} <span style={{ fontSize: '10px' }}>RON</span></div>
+                                                <div className="item-amount" style={{ color: 'var(--danger)' }}>-{s.amount} <span style={{ fontSize: '10px' }}>RON</span></div>
                                                 <span onClick={() => deleteSub(s.id)} style={{ color: 'var(--danger)', fontSize: '12px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                                                    <Icon name="Trash2" className="lucide-sm" />Șterge
+                                                    <Icon name="Trash2" className="lucide-sm" />
                                                 </span>
                                             </div>
                                         </div>
                                     ))
                                 )}
-                                <button className="btn-primary" style={{ marginTop: '16px', background: 'rgba(52, 152, 219, 0.1)', color: '#3498DB', border: '1px solid rgba(52, 152, 219, 0.3)' }} onClick={() => setShowBillModal(true)}>
-                                    <Icon name="Plus" className="lucide-sm" style={{ marginRight: '8px' }} />
+                                <button className="btn-primary" style={{ marginTop: '16px', background: 'rgba(243, 156, 18, 0.1)', color: 'var(--gold)', border: '1px solid rgba(243, 156, 18, 0.3)', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '12px' }} onClick={() => setIsAddSubOpen(true)}>
+                                    <Icon name="Plus" className="lucide-sm" />
                                     Adaugă Factură Fixă
                                 </button>
                             </div>
@@ -2356,23 +3196,28 @@
                                 })}
                             </div>
 
-                            {/* Main Rollover Balance Card */}
-                            <div className="balance-card">
-                                <div className="progress-header">
-                                    <span className="balance-label">
+                            {/* Main Rollover Circular Balance Card */}
+                            <div className="balance-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div className="progress-header" style={{ width: '100%', placeContent: 'center', marginBottom: '16px' }}>
+                                    <span className="balance-label" style={{ textAlign: 'center', display: 'block' }}>
                                         Rămas pentru {selectedDate.toDateString() === today.toDateString() ? 'Azi' : new Date(selectedDate).toLocaleDateString('ro-RO')}
                                     </span>
-                                    {totalIncome > 0 && activeDailyBudget > 0 && (
-                                        <div className={`status-badge ${(activeDailyBudget - dayTotal) > 0 ? 'good' : 'bad'}`}>
-                                            <Icon name={(activeDailyBudget - dayTotal) > 0 ? "TrendingUp" : "AlertTriangle"} className="lucide-sm" />
-                                            {(activeDailyBudget - dayTotal) > 0 ? 'În Grafic' : 'Excedat'}
+                                </div>
+
+                                <div style={{ position: 'relative', width: '180px', height: '180px', margin: '0 auto' }}>
+                                    <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%', filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.5))' }}>
+                                        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+                                        <circle cx="50" cy="50" r="45" fill="none" stroke={`var(--${activeDailyBudget - dayTotal > 0 ? (dayTotal / activeDailyBudget > 0.8 ? 'gold' : 'emerald') : 'danger'})`} strokeWidth="8" strokeDasharray="283" strokeDashoffset={activeDailyBudget > 0 ? 283 - (283 * Math.max(Math.min((activeDailyBudget - dayTotal) / activeDailyBudget, 1), 0)) : 283} style={{ transition: 'stroke-dashoffset 1s ease-out, stroke 0.5s ease' }} strokeLinecap="round" />
+                                    </svg>
+                                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div className="balance-amount" style={{ fontSize: '32px', margin: 0 }}>
+                                            {animDailyRemaining}
                                         </div>
-                                    )}
+                                        <span style={{ fontSize: '14px', color: 'var(--gray)', fontWeight: 'bold' }}>RON</span>
+                                    </div>
                                 </div>
-                                <div className="balance-amount">
-                                    {animDailyRemaining} <span style={{ fontSize: '20px', color: 'var(--gray)' }}>RON</span>
-                                </div>
-                                <div style={{ fontSize: '12px', color: 'var(--gray)', textAlign: 'right', marginTop: '4px' }}>
+
+                                <div style={{ fontSize: '12px', color: 'var(--gray)', textAlign: 'center', marginTop: '16px' }}>
                                     (Rollover cumulat cu zilele economisite)
                                 </div>
 
@@ -2392,6 +3237,16 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Goal Transfer CTA */}
+                                {goals.length > 0 && (activeDailyBudget - dayTotal) > 0 && selectedDate <= today && (
+                                    <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px', animation: 'dropInScale 0.4s ease-out', width: '100%' }}>
+                                        <button className="btn-primary" style={{ width: '100%', background: 'var(--gold)', border: 'none', color: '#000', fontSize: '15px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', boxShadow: '0 4px 15px rgba(243, 156, 18, 0.4)' }} onClick={() => { setTransferAmount((activeDailyBudget - dayTotal).toFixed(0)); setIsTransferModalOpen(true); }}>
+                                            <Icon name="PiggyBank" className="lucide-sm" style={{ color: '#000' }} />
+                                            Transferă {(activeDailyBudget - dayTotal).toFixed(0)} RON spre Obiectiv 🎉
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="section-title">Cheltuieli în Această Zi</div>
@@ -2401,22 +3256,24 @@
                                     <p style={{ fontSize: '14px' }}>Nicio plată înregistrată pe {new Date(selectedDate).toLocaleDateString('ro-RO')}.</p>
                                 </div>
                             ) : (
-                                <div>
-                                    <div style={{ fontSize: '12px', color: 'var(--gray)', marginBottom: '12px', textAlign: 'center' }}>Gestiune nouă pe mobil: Fă swipe la stânga pe o rețetă pentru a o șterge.</div>
-                                    {dayExps.map(e => {
-                                        const cat = CATEGORIES_DEFAULT.find(c => c.id === e.categoryId) || CATEGORIES_DEFAULT[CATEGORIES_DEFAULT.length - 1];
-                                        return (
-                                            <SwipeableExpenseItem
-                                                key={e.id}
-                                                expense={e}
-                                                cat={cat || CATEGORIES_DEFAULT.find(c => c.id === 'altele')}
-                                                onDelete={deleteExpense}
-                                                triggerHaptic={triggerHaptic}
-                                                isNew={addedExpenseId === e.id}
-                                            />
-                                        );
-                                    })}
-                                </div>
+                                <>
+                                    <div>
+                                        <div style={{ fontSize: '12px', color: 'var(--gray)', marginBottom: '12px', textAlign: 'center' }}>Gestiune nouă pe mobil: Fă swipe la stânga pe o rețetă pentru a o șterge.</div>
+                                        {dayExps.map(e => {
+                                            const cat = CATEGORIES_DEFAULT.find(c => c.id === e.categoryId) || CATEGORIES_DEFAULT[CATEGORIES_DEFAULT.length - 1];
+                                            return (
+                                                <SwipeableExpenseItem
+                                                    key={e.id}
+                                                    expense={e}
+                                                    cat={cat || CATEGORIES_DEFAULT.find(c => c.id === 'altele')}
+                                                    onDelete={deleteExpense}
+                                                    triggerHaptic={triggerHaptic}
+                                                    isNew={addedExpenseId === e.id}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                </>
                             )}
                         </div>
                     )}
@@ -2429,213 +3286,302 @@
                                 </div>
                                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <Icon name={userRankIcon} className="lucide-sm" style={{ color: userRankColor }} />
-                                    <span style={{ fontSize: '13px', color: 'var(--white)', fontWeight: 'bold' }}>{animGlobalSavings} <span style={{ color: 'var(--gray)', fontWeight: 'normal' }}>Economisiți</span></span>
+                                    <span style={{ color: 'var(--white)', fontSize: '12px', fontWeight: 'bold' }}>Nivel {Math.min(Math.floor(globalSavings / 1000) + 1, 100)}</span>
                                 </div>
                             </div>
 
-                            <div className="daily-intel-card" style={{ marginBottom: '24px' }}>
-                                <div className="intel-header">
-                                    <div className="intel-icon"><Icon name={aiIcon} /></div>
-                                    <div className="intel-title">Consultantul Tău Inteligent</div>
-                                </div>
-                                <div className="intel-body" style={{ lineHeight: '1.5' }}>{aiMessage}</div>
-
-                                {totalIncome > 0 && (totalIncome - totalExpenses - subs.reduce((sum, s) => sum + s.amount, 0)) > 0 && (
-                                    <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
-                                        <div style={{ fontSize: '12px', color: 'var(--gray)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Plan de Gestiune Recomandat:</div>
-
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <Icon name="PiggyBank" className="lucide-sm" style={{ color: '#2ECC71' }} />
-                                                <span style={{ color: 'var(--white)', fontSize: '13px' }}>Economii (40%)</span>
-                                            </div>
-                                            <span style={{ color: '#2ECC71', fontWeight: 'bold' }}>+{recommendedSavings.toFixed(0)} RON</span>
-                                        </div>
-
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <Icon name="TrendingUp" className="lucide-sm" style={{ color: '#3498DB' }} />
-                                                <span style={{ color: 'var(--white)', fontSize: '13px' }}>Investiții (40%)</span>
-                                            </div>
-                                            <span style={{ color: '#3498DB', fontWeight: 'bold' }}>+{recommendedInvestments.toFixed(0)} RON</span>
-                                        </div>
-
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <Icon name="Shield" className="lucide-sm" style={{ color: '#F39C12' }} />
-                                                <span style={{ color: 'var(--white)', fontSize: '13px' }}>Fond Siguranță (20%)</span>
-                                            </div>
-                                            <span style={{ color: '#F39C12', fontWeight: 'bold' }}>+{recommendedBuffer.toFixed(0)} RON</span>
-                                        </div>
+                            <div className="card" style={{ background: 'linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.2) 100%)', border: '1px solid rgba(52, 152, 219, 0.3)', marginBottom: '24px' }}>
+                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                                    <div style={{ background: 'rgba(52, 152, 219, 0.2)', padding: '10px', borderRadius: '12px' }}>
+                                        <Icon name={aiIcon} style={{ color: '#3498DB' }} />
                                     </div>
-                                )}
-                            </div>
-
-                            <div className="card" style={{ textAlign: 'center', position: 'relative', height: '280px', paddingTop: '20px' }}>
-                                {expenses.length === 0 ? (
-                                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--gray)' }}>
-                                        <Icon name="PieChart" style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '10px' }} />
-                                        <p>Nu există date pentru grafic.</p>
-                                    </div>
-                                ) : (
-                                    <canvas ref={chartRef}></canvas>
-                                )}
-                            </div>
-
-                            <div className="section-title" style={{ marginTop: '30px' }}>Independență Financiară (50/30/20)</div>
-                            <div className="card" style={{ paddingBottom: '10px' }}>
-                                <div className="split-item">
-                                    <div className="split-header">
-                                        <span style={{ color: 'var(--white)' }}>🔥 Necesități (50%)</span>
-                                        <span style={{ color: 'var(--gray)' }}>{spentNeeds.toFixed(0)} / {targetNeeds.toFixed(0)} RON</span>
-                                    </div>
-                                    <div className="progress-bar-container" style={{ background: 'rgba(231, 76, 60, 0.1)' }}>
-                                        <div className="progress-bar" style={{ width: `${pctNeeds}%`, background: '#E74C3C' }}></div>
-                                    </div>
-                                    <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Chirie, utilități, mâncare bază.</p>
-                                </div>
-
-                                <div className="split-item" style={{ marginTop: '16px' }}>
-                                    <div className="split-header">
-                                        <span style={{ color: 'var(--white)' }}>✨ Dorințe (30%)</span>
-                                        <span style={{ color: 'var(--gray)' }}>{spentWants.toFixed(0)} / {targetWants.toFixed(0)} RON</span>
-                                    </div>
-                                    <div className="progress-bar-container" style={{ background: 'rgba(243, 156, 18, 0.1)' }}>
-                                        <div className="progress-bar" style={{ width: `${pctWants}%`, background: '#F39C12' }}></div>
-                                    </div>
-                                    <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Haine, ieșiri, vacanțe, vicii.</p>
-                                </div>
-
-                                <div className="split-item" style={{ marginTop: '16px' }}>
-                                    <div className="split-header">
-                                        <span style={{ color: 'var(--white)' }}>💰 Economii & Investiții (20%)</span>
-                                        <span style={{ color: 'var(--gray)' }}>{spentSavings.toFixed(0)} / {targetSavings.toFixed(0)} RON</span>
-                                    </div>
-                                    <div className="progress-bar-container" style={{ background: 'rgba(46, 204, 113, 0.1)' }}>
-                                        <div className="progress-bar" style={{ width: `${pctSavings}%`, background: '#2ECC71' }}></div>
-                                    </div>
-                                    <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Banii puși deoparte astăzi, te salvează mâine.</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-
-
-                    {activeTab === 'settings' && (
-                        <div className="content-section">
-                            <div className="section-title">Instrucțiuni & Sfaturi</div>
-                            <div className="card" style={{ padding: '10px', background: 'transparent', border: 'none', paddingLeft: 0, paddingRight: 0 }}>
-
-                                <div className="help-card">
-                                    <div className="help-header" onClick={() => toggleHelp(0)}>
-                                        1. Cum adaugi bani la venit?
-                                        <Icon name={openHelpIndex === 0 ? "ChevronUp" : "ChevronDown"} className="lucide-sm" />
-                                    </div>
-                                    <div className={`help-body ${openHelpIndex === 0 ? 'open' : ''}`}>
-                                        Mergi pe pagina "Acasă". Sub balanță, găsești secțiunea <strong>"Ajustează Venitul"</strong>. Scrie salariul tău net curent în casuța principală, sau alege un șablon rapid (ex. "Salariul Mediu"). Totul se salvează automat!
+                                    <div>
+                                        <h3 style={{ margin: '0 0 6px 0', fontSize: '15px', color: 'var(--white)' }}>IAI Consultant Advisor</h3>
+                                        <p style={{ margin: 0, fontSize: '13px', color: '#e2e8f0', lineHeight: '1.5' }}>{aiMessage}</p>
                                     </div>
                                 </div>
-
-                                <div className="help-card">
-                                    <div className="help-header" onClick={() => toggleHelp(1)}>
-                                        2. Cum se adaugă o cheltuială?
-                                        <Icon name={openHelpIndex === 1 ? "ChevronUp" : "ChevronDown"} className="lucide-sm" />
-                                    </div>
-                                    <div className={`help-body ${openHelpIndex === 1 ? 'open' : ''}`}>
-                                        Apasă oricând pe <strong style={{ color: 'var(--gold)' }}>Butonul Auriu cu "Plus"</strong> din partea de jos a ecranului. Introduci suma scriind direct mare (ex. 150), scrii pentru ce ai dat banii (ex. "Mega Image") și alegi categoria potrivită. Aceasta va scădea progresiv din balanța ta principală.
-                                    </div>
-                                </div>
-
-                                <div className="help-card">
-                                    <div className="help-header" onClick={() => toggleHelp(2)}>
-                                        3. Regula faimoasă 50/30/20
-                                        <Icon name={openHelpIndex === 2 ? "ChevronUp" : "ChevronDown"} className="lucide-sm" />
-                                    </div>
-                                    <div className={`help-body ${openHelpIndex === 2 ? 'open' : ''}`}>
-                                        Încearcă să îți împarți cheltuielile lunare astfel: <br />
-                                        <span style={{ color: 'var(--info)' }}>• <strong>50%</strong></span> pentru <strong>Necesități curbe</strong> (Chirie, Utilități, Mâncare, Medicamente)<br />
-                                        <span style={{ color: 'var(--warning)' }}>• <strong>30%</strong></span> pentru <strong>Dorințe & Răsfăț</strong> (Abonamente Netflix, Haine, Ieșiri)<br />
-                                        <span style={{ color: 'var(--emerald)' }}>• <strong>20%</strong></span> pentru <strong>Economii</strong> (Investiții, Fond de Urgență).<br />
-                                        Aplicația îți arată prin Bara de Progres colorată (Verde ➜ Portocaliu ➜ Roșu) cât de aproape ești de a depăși zona sigură a salariului!
-                                    </div>
-                                </div>
-
-                                <div className="help-card">
-                                    <div className="help-header" onClick={() => toggleHelp(3)}>
-                                        4. La ce mă ajută Asistentul Siguranță?
-                                        <Icon name={openHelpIndex === 3 ? "ChevronUp" : "ChevronDown"} className="lucide-sm" />
-                                    </div>
-                                    <div className={`help-body ${openHelpIndex === 3 ? 'open' : ''}`}>
-                                        În Tab-ul <strong style={{ color: 'var(--white)' }}><Icon name="PieChart" className="lucide-sm" style={{ marginRight: '4px', verticalAlign: 'middle' }} />Analiză</strong>, Asistentul împarte banii tăi rămași matematic la **zilele rămase din luna curentă**. Îți arată **Plafonul de Cheltuieli Zilnic**. Dacă nu depășești acea sumă într-o zi (ex: max 40 RON azi), ești 100% sigur că nu o să rămâi fără bani la sfârșitul lunii!
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="section-title" style={{ marginTop: '30px' }}>Securitate & Backup (Offline)</div>
-                            <div className="card">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid var(--border-dim)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <div style={{ background: 'rgba(243, 156, 18, 0.1)', padding: '10px', borderRadius: '12px' }}>
-                                            <Icon name="Shield" style={{ color: 'var(--gold)' }} />
-                                        </div>
-                                        <div>
-                                            <div style={{ color: 'var(--white)', fontWeight: 'bold', fontSize: '15px' }}>Protecție Cod PIN</div>
-                                            <div style={{ color: 'var(--gray)', fontSize: '12px', marginTop: '2px' }}>Blochează accesul în aplicație</div>
-                                        </div>
-                                    </div>
-                                    {savedPin ? (
-                                        <button className="btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={removePin}>Elimină</button>
-                                    ) : (
-                                        <button className="btn-outline" onClick={() => setIsSettingPin(true)}>Configurează</button>
-                                    )}
-                                </div>
-
-                                <div style={{ marginBottom: '8px' }}>
-                                    <h4 style={{ color: 'var(--white)', fontSize: '14px', marginBottom: '8px' }}>Salvare și Restaurare Date</h4>
-                                    <p style={{ fontSize: '13px', color: 'var(--gray)', marginBottom: '16px', lineHeight: '1.4' }}>
-                                        Banii și cheltuielile tale nu ajung pe servere. Descarcă periodic o copie de siguranță pentru a o păstra în Cloud (iCloud/Drive) sau dacă îți schimbi telefonul.
-                                    </p>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                        <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={handleExportJson}>
-                                            <Icon name="DownloadCloud" className="lucide-sm" /> Exportă (.json)
-                                        </button>
-                                        <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => fileInputRef.current && fileInputRef.current.click()}>
-                                            <Icon name="UploadCloud" className="lucide-sm" /> Importă (.json)
-                                        </button>
-                                        <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".json" onChange={handleImportJson} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="section-title" style={{ marginTop: '30px' }}>Setări Ciclu Bugetar</div>
-                            <div className="card">
-                                <label style={{ fontSize: '14px', color: 'var(--white)', fontWeight: 'bold' }}>Ziua ta de Salariu</label>
-                                <select value={payday} onChange={(e) => {
-                                    const val = parseInt(e.target.value);
-                                    setPayday(val);
-                                    window.localStorage.setItem('IAI_Planner_Payday', val);
-                                    showToast('Ziua de resetare salvată!', 'success');
-                                }} style={{ width: '100%', padding: '12px', marginTop: '10px', background: 'var(--bg-dark)', color: 'var(--white)', border: '1px solid var(--border-dim)', borderRadius: '8px' }}>
-                                    {[...Array(28)].map((_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
-                                </select>
-                                <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '8px' }}>Selectează data în care primești banii. Calendarul va re-calcula bugetul tău zilnic luând în calcul zilele dintre salariul luna curentă și cel din luna viitoare.</p>
-                            </div>
-
-                            <div className="section-title" style={{ marginTop: '30px' }}>Gestiune Date Locale</div>
-                            <div className="card">
-                                <p style={{ fontSize: '13px', color: 'var(--dgray)', marginBottom: '16px' }}>Datele financiare sunt păstrate 100% Offline în memoria internă a telefonului tău (localStorage). Nu ai cont, nu ai parolă, nu le putem vedea pe server. Privacidade Maximă.</p>
-                                <button className="btn btn-secondary" style={{ color: 'var(--danger)', borderColor: 'rgba(255, 77, 77, 0.3)' }} onClick={() => {
-                                    if (confirm('Atenție: Ștergi definitiv tot istoricul financiar salvat de pe acest telefon? Această acțiune este ireversibilă!')) {
-                                        try { window.localStorage.removeItem('IAI_Planner_V2'); } catch (e) { }
-                                        window.location.reload();
-                                    }
-                                }}>
-                                    <Icon name="Trash" className="lucide-sm" /> Șterge Tot Istoricul Meu
+                                <button onClick={generateAIContext} className="btn-primary" style={{ marginTop: '16px', background: 'var(--blue)', color: 'white', width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderRadius: '12px', fontSize: '14px' }}>
+                                    <Icon name="Bot" className="lucide-sm" /> Generează Prompt Avansat (ChatGPT Copy)
                                 </button>
                             </div>
+
+                            {totalIncome > 0 && (totalIncome - totalExpenses) > 0 && (
+                                <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                                    <div style={{ fontSize: '11px', color: 'var(--gray)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 'bold' }}>Suma Rămasă De Alocat (50/30/20):</div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Icon name="Home" className="lucide-sm" style={{ color: '#E74C3C' }} />
+                                            <span style={{ color: '#e2e8f0', fontSize: '13px' }}>Necesități (Chirie, Facturi)</span>
+                                        </div>
+                                        <span style={{ color: '#E74C3C', fontWeight: 'bold' }}>{recNeeds.toFixed(0)} RON</span>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Icon name="Coffee" className="lucide-sm" style={{ color: '#F39C12' }} />
+                                            <span style={{ color: '#e2e8f0', fontSize: '13px' }}>Dorințe (Ieșiri, Hobby)</span>
+                                        </div>
+                                        <span style={{ color: '#F39C12', fontWeight: 'bold' }}>{recWants.toFixed(0)} RON</span>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Icon name="PiggyBank" className="lucide-sm" style={{ color: '#2ECC71' }} />
+                                            <span style={{ color: '#e2e8f0', fontSize: '13px' }}>Economii & Investiții</span>
+                                        </div>
+                                        <span style={{ color: '#2ECC71', fontWeight: 'bold' }}>{recSavings.toFixed(0)} RON</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
+
+                    {/* Goals Section (Obiectivele Mele) */}
+                    <div className="section-title" style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Obiectivele Mele 🎯</span>
+                        <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 12px' }} onClick={() => setIsAddGoalOpen(true)}>+ Obiectiv Nou</button>
+                    </div>
+
+                    {goals.length === 0 ? (
+                        <div className="card" style={{ textAlign: 'center', padding: '24px 16px' }}>
+                            <Icon name="Target" style={{ width: '48px', height: '48px', color: 'var(--gray)', opacity: 0.5, marginBottom: '16px' }} />
+                            <h3 style={{ color: 'var(--white)', fontSize: '16px', marginBottom: '8px' }}>Nu ai setat niciun obiectiv.</h3>
+                            <p style={{ color: 'var(--gray)', fontSize: '13px', lineHeight: '1.4' }}>Planifică-ți economiile (ex. un telefon, vacanță) și atinge-ți scopurile financiar.</p>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {goals.map(goal => {
+                                const progress = Math.min((goal.currentSavedAmount / goal.targetAmount) * 100, 100);
+                                const circumference = 2 * Math.PI * 26; // r=26
+                                const offset = circumference - (progress / 100) * circumference;
+                                const remaining2 = goal.targetAmount - goal.currentSavedAmount;
+                                const daysNeeded = remaining2 > 0 && allowancePerDay > 0 ? Math.ceil(remaining2 / (allowancePerDay * 0.5)) : null;
+                                return (
+                                    <div key={goal.id} className="goal-card-premium">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '14px' }}>
+                                            {/* SVG Ring */}
+                                            <div className="goal-ring-wrap">
+                                                <svg width="64" height="64" viewBox="0 0 60 60">
+                                                    <circle cx="30" cy="30" r="26" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
+                                                    <circle cx="30" cy="30" r="26" fill="none" stroke="url(#goalGrad)" strokeWidth="5"
+                                                        strokeDasharray={circumference} strokeDashoffset={offset}
+                                                        strokeLinecap="round"
+                                                        style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1)' }} />
+                                                    <defs>
+                                                        <linearGradient id="goalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                            <stop offset="0%" stopColor="#F39C12" />
+                                                            <stop offset="100%" stopColor="#F1C40F" />
+                                                        </linearGradient>
+                                                    </defs>
+                                                </svg>
+                                                <div className="goal-ring-num">{Math.round(progress)}%</div>
+                                            </div>
+                                            {/* Goal Info */}
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ color: 'var(--white)', fontWeight: 'bold', fontSize: '16px', marginBottom: '2px' }}>{goal.name}</div>
+                                                <div style={{ color: 'var(--gray)', fontSize: '12px' }}>
+                                                    <span style={{ color: 'var(--gold)', fontFamily: 'var(--font-mono)', fontWeight: 800 }}>{fmt(goal.currentSavedAmount)}</span>
+                                                    <span style={{ color: 'var(--dgray)' }}> / {fmt(goal.targetAmount)} RON</span>
+                                                </div>
+                                                {daysNeeded && (
+                                                    <div style={{ marginTop: '4px', fontSize: '11px', color: 'var(--emerald)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <Icon name="Clock" className="lucide-sm" style={{ width: '12px', height: '12px' }} />
+                                                        ~{daysNeeded} zile la ritm actual
+                                                    </div>
+                                                )}
+                                                {goal.targetDate && (
+                                                    <div style={{ fontSize: '11px', color: 'var(--info)', marginTop: '2px' }}>
+                                                        🎯 Target: {new Date(goal.targetDate).toLocaleDateString('ro-RO')}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '50px', flexShrink: 0 }} onClick={() => { setSelectedGoalId(goal.id); setIsTransferModalOpen(true); }}>
+                                                <Icon name="PlusCircle" className="lucide-sm" /> Depune
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    <div className="card" style={{ textAlign: 'center', position: 'relative', height: '280px', paddingTop: '20px', marginTop: '24px' }}>
+                        {(expenses.length === 0 && subs.length === 0) ? (
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--gray)' }}>
+                                <Icon name="PieChart" style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '10px' }} />
+                                <p>Nu există date pentru grafic.</p>
+                            </div>
+                        ) : (
+                            <canvas ref={chartRef}></canvas>
+                        )}
+                    </div>
+
+                    <div className="section-title" style={{ marginTop: '30px' }}>Independență Financiară (50/30/20)</div>
+                    <div className="card" style={{ paddingBottom: '10px' }}>
+                        {/* Net Savings Rate */}
+                        {totalIncome > 0 && (
+                            <div style={{ textAlign: 'center', padding: '8px 0 20px 0', borderBottom: '1px solid var(--border-dim)', marginBottom: '20px' }}>
+                                <div style={{ fontSize: '11px', color: 'var(--dgray)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Rata de Economisire Netă</div>
+                                <div style={{ fontSize: '40px', fontWeight: 900, fontFamily: 'var(--font-mono)', color: remaining > 0 ? 'var(--emerald)' : 'var(--danger)', lineHeight: 1 }}>
+                                    {totalIncome > 0 ? Math.max(0, ((remaining / totalIncome) * 100)).toFixed(0) : 0}%
+                                </div>
+                                <div style={{ fontSize: '12px', color: 'var(--gray)', marginTop: '4px' }}>din venit rămâne disponibil</div>
+                            </div>
+                        )}
+                        <div className="split-item">
+                            <div className="split-header">
+                                <span style={{ color: 'var(--white)' }}>🔥 Necesități (50%)</span>
+                                <span style={{ color: 'var(--gray)' }}>{(spentNeeds + totalFixed).toFixed(0)} / {targetNeeds.toFixed(0)} RON</span>
+                            </div>
+                            <div className="progress-bar-container" style={{ background: 'rgba(231, 76, 60, 0.1)' }}>
+                                <div className="progress-bar" style={{ width: `${pctNeeds}%`, background: '#E74C3C' }}></div>
+                            </div>
+                            <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Chirie, utilități, mâncare bază.</p>
+                        </div>
+
+                        <div className="split-item" style={{ marginTop: '16px' }}>
+                            <div className="split-header">
+                                <span style={{ color: 'var(--white)' }}>✨ Dorințe (30%)</span>
+                                <span style={{ color: 'var(--gray)' }}>{spentWants.toFixed(0)} / {targetWants.toFixed(0)} RON</span>
+                            </div>
+                            <div className="progress-bar-container" style={{ background: 'rgba(243, 156, 18, 0.1)' }}>
+                                <div className="progress-bar" style={{ width: `${pctWants}%`, background: '#F39C12' }}></div>
+                            </div>
+                            <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Haine, ieșiri, vacanțe, vicii.</p>
+                        </div>
+
+                        <div className="split-item" style={{ marginTop: '16px' }}>
+                            <div className="split-header">
+                                <span style={{ color: 'var(--white)' }}>💰 Economii &amp; Investiții (20%)</span>
+                                <span style={{ color: 'var(--gray)' }}>{spentSavings.toFixed(0)} / {targetSavings.toFixed(0)} RON</span>
+                            </div>
+                            <div className="progress-bar-container" style={{ background: 'rgba(46, 204, 113, 0.1)' }}>
+                                <div className="progress-bar" style={{ width: `${pctSavings}%`, background: '#2ECC71' }}></div>
+                            </div>
+                            <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '4px' }}>Banii puși deoparte astăzi, te salvează mâine.</p>
+                        </div>
+                    </div>
+
+                    {
+                        activeTab === 'settings' && (
+                            <div className="content-section">
+                                <div className="section-title">Instrucțiuni & Sfaturi</div>
+                                <div className="card" style={{ padding: '10px', background: 'transparent', border: 'none', paddingLeft: 0, paddingRight: 0 }}>
+
+                                    <div className="help-card">
+                                        <div className="help-header" onClick={() => toggleHelp(0)}>
+                                            1. Cum adaugi bani la venit?
+                                            <Icon name={openHelpIndex === 0 ? "ChevronUp" : "ChevronDown"} className="lucide-sm" />
+                                        </div>
+                                        <div className={`help-body ${openHelpIndex === 0 ? 'open' : ''}`}>
+                                            Mergi pe pagina "Acasă". În secțiunea <strong>"Veniturile Mele"</strong>, poți adăuga un <strong>Salariu</strong> fix sau orice alt <strong>Venit Extra</strong> (comisioane, bonusuri). Toate sumele se adună pentru a forma bugetul tău total.
+                                        </div>
+                                    </div>
+
+                                    <div className="help-card">
+                                        <div className="help-header" onClick={() => toggleHelp(1)}>
+                                            2. Cum se adaugă o cheltuială?
+                                            <Icon name={openHelpIndex === 1 ? "ChevronUp" : "ChevronDown"} className="lucide-sm" />
+                                        </div>
+                                        <div className={`help-body ${openHelpIndex === 1 ? 'open' : ''}`}>
+                                            Apasă pe butonul <strong style={{ color: 'var(--gold)' }}><Icon name="MinusCircle" className="lucide-sm" style={{ verticalAlign: 'middle' }} /></strong> din meniul de jos. Introdu suma și categoria. Banii sunt scăzuți instant din balanța ta disponibilă, după ce am rezervat deja banii pentru facturile tale fixe.
+                                        </div>
+                                    </div>
+
+                                    <div className="help-card">
+                                        <div className="help-header" onClick={() => toggleHelp(2)}>
+                                            3. Regula faimoasă 50/30/20
+                                            <Icon name={openHelpIndex === 2 ? "ChevronUp" : "ChevronDown"} className="lucide-sm" />
+                                        </div>
+                                        <div className={`help-body ${openHelpIndex === 2 ? 'open' : ''}`}>
+                                            Încearcă să îți împarți cheltuielile lunare astfel: <br />
+                                            <span style={{ color: 'var(--info)' }}>• <strong>50%</strong></span> pentru <strong>Necesități curbe</strong> (Chirie, Utilități, Mâncare, Medicamente)<br />
+                                            <span style={{ color: 'var(--warning)' }}>• <strong>30%</strong></span> pentru <strong>Dorințe & Răsfăț</strong> (Abonamente Netflix, Haine, Ieșiri)<br />
+                                            <span style={{ color: 'var(--emerald)' }}>• <strong>20%</strong></span> pentru <strong>Economii</strong> (Investiții, Fond de Urgență).<br />
+                                            Aplicația îți arată prin Bara de Progres colorată (Verde ➜ Portocaliu ➜ Roșu) cât de aproape ești de a depăși zona sigură a salariului!
+                                        </div>
+                                    </div>
+
+                                    <div className="help-card">
+                                        <div className="help-header" onClick={() => toggleHelp(3)}>
+                                            4. La ce mă ajută Asistentul Siguranță?
+                                            <Icon name={openHelpIndex === 3 ? "ChevronUp" : "ChevronDown"} className="lucide-sm" />
+                                        </div>
+                                        <div className={`help-body ${openHelpIndex === 3 ? 'open' : ''}`}>
+                                            În Tab-ul <strong style={{ color: 'var(--white)' }}><Icon name="PieChart" className="lucide-sm" style={{ marginRight: '4px', verticalAlign: 'middle' }} />Analiză</strong>, Asistentul împarte banii tăi rămași matematic la **zilele rămase din luna curentă**. Îți arată **Plafonul de Cheltuieli Zilnic**. Dacă nu depășești acea sumă într-o zi (ex: max 40 RON azi), ești 100% sigur că nu o să rămâi fără bani la sfârșitul lunii!
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="section-title" style={{ marginTop: '30px' }}>Securitate & Backup (Offline)</div>
+                                <div className="card">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid var(--border-dim)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ background: 'rgba(243, 156, 18, 0.1)', padding: '10px', borderRadius: '12px' }}>
+                                                <Icon name="Shield" style={{ color: 'var(--gold)' }} />
+                                            </div>
+                                            <div>
+                                                <div style={{ color: 'var(--white)', fontWeight: 'bold', fontSize: '15px' }}>Protecție Cod PIN</div>
+                                                <div style={{ color: 'var(--gray)', fontSize: '12px', marginTop: '2px' }}>Blochează accesul în aplicație</div>
+                                            </div>
+                                        </div>
+                                        {savedPin ? (
+                                            <button className="btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={removePin}>Elimină</button>
+                                        ) : (
+                                            <button className="btn-outline" onClick={() => setIsSettingPin(true)}>Configurează</button>
+                                        )}
+                                    </div>
+
+                                    <div style={{ marginBottom: '8px' }}>
+                                        <h4 style={{ color: 'var(--white)', fontSize: '14px', marginBottom: '8px' }}>Salvare și Restaurare Date</h4>
+                                        <p style={{ fontSize: '13px', color: 'var(--gray)', marginBottom: '16px', lineHeight: '1.4' }}>
+                                            Banii și cheltuielile tale nu ajung pe servere. Descarcă periodic o copie de siguranță pentru a o păstra în Cloud (iCloud/Drive) sau dacă îți schimbi telefonul.
+                                        </p>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                            <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={handleExportJson}>
+                                                <Icon name="DownloadCloud" className="lucide-sm" /> Exportă (.json)
+                                            </button>
+                                            <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => fileInputRef.current && fileInputRef.current.click()}>
+                                                <Icon name="UploadCloud" className="lucide-sm" /> Importă (.json)
+                                            </button>
+                                            <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".json" onChange={handleImportJson} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="section-title" style={{ marginTop: '30px' }}>Setări Ciclu Bugetar</div>
+                                <div className="card">
+                                    <label style={{ fontSize: '14px', color: 'var(--white)', fontWeight: 'bold' }}>Ziua ta de Salariu</label>
+                                    <select value={payday} onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        setPayday(val);
+                                        window.localStorage.setItem('IAI_Planner_Payday', val);
+                                        showToast('Ziua de resetare salvată!', 'success');
+                                    }} style={{ width: '100%', padding: '12px', marginTop: '10px', background: 'var(--bg-dark)', color: 'var(--white)', border: '1px solid var(--border-dim)', borderRadius: '8px' }}>
+                                        {[...Array(28)].map((_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
+                                    </select>
+                                    <p style={{ fontSize: '11px', color: 'var(--gray)', marginTop: '8px' }}>Selectează data în care primești banii. Calendarul va re-calcula bugetul tău zilnic luând în calcul zilele dintre salariul luna curentă și cel din luna viitoare.</p>
+                                </div>
+
+                                <div className="section-title" style={{ marginTop: '30px' }}>Gestiune Date Locale</div>
+                                <div className="card">
+                                    <p style={{ fontSize: '13px', color: 'var(--dgray)', marginBottom: '16px' }}>Datele financiare sunt păstrate 100% Offline în memoria internă a telefonului tău (localStorage). Nu ai cont, nu ai parolă, nu le putem vedea pe server. Privacidade Maximă.</p>
+                                    <button className="btn btn-secondary" style={{ color: 'var(--danger)', borderColor: 'rgba(255, 77, 77, 0.3)' }} onClick={() => {
+                                        if (confirm('Atenție: Ștergi definitiv tot istoricul financiar salvat de pe acest telefon? Această acțiune este ireversibilă!')) {
+                                            try { window.localStorage.removeItem('IAI_Planner_V2'); } catch (e) { }
+                                            window.location.reload();
+                                        }
+                                    }}>
+                                        <Icon name="Trash" className="lucide-sm" /> Șterge Tot Istoricul Meu
+                                    </button>
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* FAB Overlay Background */}
+                    <div className={`fab-overlay ${isFabMenuOpen ? 'show' : ''}`} onClick={() => setIsFabMenuOpen(false)}></div>
 
                     {/* Navigation Bar */}
                     <div className="bottom-nav">
@@ -2649,7 +3595,26 @@
                             <span className="nav-label">Calendar</span>
                         </div>
 
-                        <div style={{ width: '60px' }}></div>
+                        {/* Animated FAB Core */}
+                        <div className="fab-container">
+                            <div className="fab" onClick={() => { triggerHaptic([50]); setIsFabMenuOpen(!isFabMenuOpen); }} style={{ zIndex: 102 }}>
+                                <div className={`fab-icon-rotator ${isFabMenuOpen ? 'fab-open-true' : ''}`}>
+                                    <Icon name="Plus" style={{ width: '32px', height: '32px' }} />
+                                </div>
+                            </div>
+                            <div className={`fab-menu ${isFabMenuOpen ? 'open' : ''}`}>
+
+                                <div className="fab-action action-transfer" onClick={() => { setIsFabMenuOpen(false); setTransferAmount(''); setSelectedGoalId(''); setIsTransferModalOpen(true); triggerHaptic([30]); }}>
+                                    <Icon name="Target" className="lucide-sm" />
+                                </div>
+                                <div className="fab-action action-expense" onClick={() => { setIsFabMenuOpen(false); setTransactionType('expense'); setIsExpenseModalOpen(true); triggerHaptic([30]); }}>
+                                    <Icon name="Minus" className="lucide-sm" />
+                                </div>
+                                <div className="fab-action action-income" onClick={() => { setIsFabMenuOpen(false); setEditIncomeId(null); setNewIncomeSource(''); setNewIncomeAmount(''); setIsIncomeModalOpen(true); triggerHaptic([30]); }}>
+                                    <Icon name="Plus" className="lucide-sm" />
+                                </div>
+                            </div>
+                        </div>
 
                         <div className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => handleTabChange('analytics')}>
                             <Icon name="PieChart" />
@@ -2660,154 +3625,302 @@
                             <Icon name="Settings" />
                             <span className="nav-label">Ajutor</span>
                         </div>
-
-                        {/* Add FAB Icon */}
-                        <div className="fab" onClick={() => { triggerHaptic([50]); setIsAddModalOpen(true); }}>
-                            <Icon name="Plus" style={{ width: '32px', height: '32px' }} />
-                        </div>
                     </div>
 
-                    {/* Add Transaction Modal Overlay */}
-                    {isAddModalOpen && (
-                        <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsAddModalOpen(false) }}>
-                            <div className="modal-sheet">
-                                <div className="modal-header">
-                                    <h2 style={{ fontSize: '20px' }}>Suma Cheltuită</h2>
-                                    <button className="close-btn" onClick={() => setIsAddModalOpen(false)}>
-                                        <Icon name="X" />
-                                    </button>
-                                </div>
-                                {isAddingSuccess ? (
-                                    <div style={{ padding: '60px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                        <svg className="animated-check" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="20 6 9 17 4 12"></polyline>
-                                        </svg>
-                                        <h3 style={{ color: 'var(--emerald)', marginTop: '20px', fontSize: '24px' }}>Salvat cu succes!</h3>
+                    {/* Master Transaction Modal Overlay (V2 Premium) */}
+                    {
+                        isExpenseModalOpen && (
+                            <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsExpenseModalOpen(false) }}>
+                                <div className="modal-sheet">
+                                    {/* Drag Handle */}
+                                    <div style={{ width: '36px', height: '4px', background: 'rgba(255,255,255,0.15)', borderRadius: '100px', margin: '0 auto 16px auto' }} />
+                                    <div className="modal-header" style={{ paddingTop: 0 }}>
+                                        <h2 style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{ background: 'rgba(255,77,77,0.15)', borderRadius: '10px', padding: '6px', display: 'inline-flex' }}>
+                                                <Icon name="MinusCircle" style={{ color: 'var(--danger)', width: '20px', height: '20px' }} />
+                                            </div>
+                                            Plată Nouă
+                                        </h2>
+                                        <button className="close-btn" onClick={() => setIsExpenseModalOpen(false)}>
+                                            <Icon name="X" />
+                                        </button>
                                     </div>
-                                ) : (
-                                    <form onSubmit={handleAddExpense}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                                            <button
-                                                type="button"
-                                                onClick={handleVoiceInput}
-                                                style={{
-                                                    background: isListening ? 'rgba(231, 76, 60, 0.2)' : 'var(--bg-lighter)',
-                                                    border: `1px solid ${isListening ? '#E74C3C' : 'var(--border)'}`,
-                                                    color: isListening ? '#E74C3C' : 'var(--white)',
-                                                    padding: '12px 24px',
-                                                    borderRadius: '30px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.3s',
-                                                    fontFamily: 'var(--font-main)'
-                                                }}
-                                            >
-                                                <Icon name="Mic" className={isListening ? 'lucide-pulse' : ''} />
-                                                {isListening ? 'Te ascult...' : 'Adaugă Vocal (ex: "cafea 15 lei")'}
-                                            </button>
+                                    {isAddingSuccess ? (
+                                        <div style={{ padding: '60px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                            <svg className="animated-check" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                            <h3 style={{ color: 'var(--emerald)', marginTop: '20px', fontSize: '24px' }}>Înregistrat!</h3>
                                         </div>
+                                    ) : (
+                                        <form onSubmit={handleAddExpense}>
 
+                                            {transactionType === 'expense' && (
+                                                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                                                    <button type="button" onClick={handleVoiceInput} style={{ background: isListening ? 'rgba(231, 76, 60, 0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isListening ? '#E74C3C' : 'rgba(255,255,255,0.1)'}`, color: isListening ? '#E74C3C' : 'var(--white)', padding: '10px 24px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                                                        <Icon name="Mic" className={isListening ? 'lucide-pulse' : ''} />
+                                                        {isListening ? 'Te ascult...' : 'Adaugă Vocal'}
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            <div className="form-group" style={{ position: 'relative' }}>
+                                                <input type="number" step="0.01" min="0.01" placeholder="0.00" value={newExpenseAmount} onChange={e => setNewExpenseAmount(e.target.value)} style={{ fontSize: '36px', fontWeight: '900', fontFamily: 'var(--font-mono)', paddingLeft: '50px', color: 'var(--white)', letterSpacing: '-0.5px' }} autoFocus />
+                                                <span style={{ position: 'absolute', left: '16px', top: '14px', fontSize: '26px', color: 'var(--danger)', fontWeight: '700', fontFamily: 'var(--font-mono)' }}>-</span>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Descriere</label>
+                                                <input type="text" placeholder="Ex: Mega Image, Benzină..." value={newExpenseName} onChange={e => setNewExpenseName(e.target.value)} />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Categorie</label>
+                                                <select value={newExpenseCat} onChange={e => setNewExpenseCat(e.target.value)}>
+                                                    {CATEGORIES_DEFAULT.map(c => <option key={c.id} value={c.id}>{c.emoji || ''} {c.name}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Notă (Opțional)</label>
+                                                <input type="text" placeholder="Ex: cumpărături weekend, aniversare..." value={newExpenseNote || ''} onChange={e => setNewExpenseNote && setNewExpenseNote(e.target.value)} style={{ fontSize: '14px', color: 'var(--gray)' }} />
+                                            </div>
+
+                                            <div className="form-group" style={{ marginTop: '4px' }}>
+                                                <label>Dată (Opțională)</label>
+                                                <input type="date" value={newExpenseDate} onChange={e => setNewExpenseDate(e.target.value)} style={{ padding: '12px', background: 'var(--bg-dark)', color: 'var(--gray)', border: '1px solid var(--border-dim)', borderRadius: '8px', width: '100%', fontFamily: 'var(--font-mono)' }} />
+                                            </div>
+
+                                            <button type="submit" className="btn btn-primary" style={{ marginTop: '20px', background: 'var(--gold)', color: 'black' }}>
+                                                Salvează <Icon name="Check" className="lucide-sm" />
+                                            </button>
+                                        </form>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* Add Subscription Modal Overlay */}
+                    {
+                        isAddSubOpen && (
+                            <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsAddSubOpen(false) }}>
+                                <div className="modal-sheet">
+                                    <div className="modal-header">
+                                        <h2 style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Icon name="CalendarClock" style={{ color: 'var(--gold)' }} />
+                                            Abonament Nou
+                                        </h2>
+                                        <button className="close-btn" onClick={() => setIsAddSubOpen(false)}>
+                                            <Icon name="X" />
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={handleAddSub}>
                                         <div className="form-group" style={{ position: 'relative' }}>
                                             <input
                                                 type="number"
                                                 step="0.01"
+                                                min="0.01"
                                                 placeholder="0.00"
-                                                value={newExpenseAmount}
-                                                onChange={e => setNewExpenseAmount(e.target.value)}
-                                                required
-                                                style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-mono)', paddingLeft: '50px' }}
+                                                value={newSubAmount}
+                                                onChange={e => setNewSubAmount(e.target.value)}
+                                                style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-mono)' }}
                                                 autoFocus
                                             />
-                                            <span style={{ position: 'absolute', left: '16px', top: '16px', fontSize: '24px', color: 'var(--dgray)', fontWeight: '700', fontFamily: 'var(--font-mono)' }}>-</span>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label>Ce ai cumpărat?</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Ex: Factură EON, Mega Image..."
-                                                value={newExpenseName}
-                                                onChange={e => setNewExpenseName(e.target.value)}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label>Categorie</label>
-                                            <div style={{ position: 'relative' }}>
-                                                <select value={newExpenseCat} onChange={e => setNewExpenseCat(e.target.value)}>
-                                                    {CATEGORIES_DEFAULT.map(c => (
-                                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
                                         </div>
 
                                         <div className="form-group" style={{ marginTop: '20px' }}>
-                                            <label>Modificare Dată (Opțional)</label>
-                                            <input type="date" value={newExpenseDate} onChange={e => setNewExpenseDate(e.target.value)} style={{ padding: '12px', background: 'var(--bg-dark)', color: 'var(--gray)', border: '1px solid var(--border-dim)', borderRadius: '8px', width: '100%', fontFamily: 'var(--font-mono)' }} />
+                                            <label>Nume Factură / Abonament</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Ex: Netflix, Chirie, Rată Bancă..."
+                                                value={newSubName}
+                                                onChange={e => setNewSubName(e.target.value)}
+                                            />
                                         </div>
 
-                                        <button type="submit" className="btn btn-primary" style={{ marginTop: '20px' }}>
-                                            Adaugă Plată <Icon name="Check" className="lucide-sm" />
+                                        <div className="form-group" style={{ marginTop: '24px' }}>
+                                            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '18px' }}>
+                                                <Icon name="Check" />
+                                                Salvează Recurența
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* Add Goal Modal Overlay */}
+                    {
+                        isAddGoalOpen && (
+                            <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsAddGoalOpen(false) }}>
+                                <div className="modal-sheet">
+                                    <div className="modal-header">
+                                        <h2 style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Icon name="Target" style={{ color: 'var(--gold)' }} />
+                                            Obiectiv Nou
+                                        </h2>
+                                        <button className="close-btn" onClick={() => setIsAddGoalOpen(false)}>
+                                            <Icon name="X" />
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={handleAddGoal}>
+                                        <div className="form-group" style={{ position: 'relative' }}>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0.01"
+                                                placeholder="Suma Țintă (Ex: 5000)"
+                                                value={newGoalAmount}
+                                                onChange={e => setNewGoalAmount(e.target.value)}
+                                                style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-mono)' }}
+                                                autoFocus
+                                            />
+                                        </div>
+
+                                        <div className="form-group" style={{ marginTop: '20px' }}>
+                                            <label>Pentru ce strângi bani?</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Ex: Vacanță, Mașină..."
+                                                value={newGoalName}
+                                                onChange={e => setNewGoalName(e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="form-group" style={{ marginTop: '24px' }}>
+                                            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '16px', background: 'var(--gold)', color: 'var(--bg-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                                <Icon name="Check" className="lucide-sm" />
+                                                Setează Obiectivul
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* Transfer to Goal Modal Overlay */}
+                    {
+                        isTransferModalOpen && (
+                            <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsTransferModalOpen(false) }}>
+                                <div className="modal-sheet">
+                                    <div className="modal-header">
+                                        <h2 style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--gold)' }}>
+                                            <Icon name="PiggyBank" style={{ color: 'var(--gold)' }} />
+                                            Transferă Economiile
+                                        </h2>
+                                        <button className="close-btn" onClick={() => setIsTransferModalOpen(false)}>
+                                            <Icon name="X" />
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={handleTransferToGoal}>
+                                        <div className="form-group" style={{ position: 'relative' }}>
+                                            <input
+                                                type="number"
+                                                step="1"
+                                                min="1"
+                                                placeholder="Suma (ex: 100)"
+                                                value={transferAmount}
+                                                onChange={e => setTransferAmount(e.target.value)}
+                                                style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: 'var(--gold)' }}
+                                            />
+                                        </div>
+                                        <p style={{ fontSize: '13px', color: 'var(--gray)', marginTop: '-8px', marginBottom: '16px' }}>Mută banii din balanța disponibilă către acest obiectiv.</p>
+
+                                        <div className="form-group">
+                                            <label>Spre ce obiectiv transferi?</label>
+                                            <select value={selectedGoalId} onChange={e => setSelectedGoalId(e.target.value)} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--white)', fontSize: '16px', appearance: 'auto' }} required>
+                                                <option value="" disabled>Alege...</option>
+                                                {goals.map(g => (
+                                                    <option key={g.id} value={g.id}>{g.name} ({g.currentSavedAmount.toFixed(0)}/{g.targetAmount})</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group" style={{ marginTop: '24px' }}>
+                                            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '16px', background: 'var(--gold)', color: '#000', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                                <Icon name="Check" className="lucide-sm" />
+                                                Confirmă Transferul
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* V2 Premium: User Profile Setup Modal */}
+                    {
+                        isProfileModalOpen && (
+                            <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsProfileModalOpen(false) }}>
+                                <div className="modal-sheet">
+                                    <div className="modal-header">
+                                        <h2 style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Icon name="User" style={{ color: 'var(--gold)' }} /> Setări Profil
+                                        </h2>
+                                        <button className="close-btn" onClick={() => setIsProfileModalOpen(false)}>
+                                            <Icon name="X" />
+                                        </button>
+                                    </div>
+                                    <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <div style={{ position: 'relative', marginBottom: '24px' }}>
+                                            {userProfile.avatar ? (
+                                                <img src={userProfile.avatar} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--gold)', boxShadow: '0 4px 15px rgba(243,156,18,0.3)' }} />
+                                            ) : (
+                                                <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--bg2)', border: '2px dashed var(--gray)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gray)' }}>
+                                                    <Icon name="Camera" />
+                                                </div>
+                                            )}
+                                            <input type="file" accept="image/*" onChange={handleProfileImageUpload} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
+                                        </div>
+                                        <div className="form-group" style={{ width: '100%' }}>
+                                            <label>Numele tău</label>
+                                            <input type="text" value={editProfileName} onChange={e => setEditProfileName(e.target.value)} placeholder="Ex: Alex" required />
+                                        </div>
+                                        <button type="submit" className="btn-primary" style={{ width: '100%', padding: '16px', background: 'var(--gold)', color: '#000', fontWeight: 'bold' }}>Salvează Profilul</button>
+                                    </form>
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* V2 Premium: Add/Edit Income Modal */}
+                    {
+                        isIncomeModalOpen && (
+                            <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsIncomeModalOpen(false) }}>
+                                <div className="modal-sheet">
+                                    <div className="modal-header">
+                                        <h2 style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Icon name={newIncomeSource.toLowerCase().includes('salariu') ? "Target" : "Banknote"} style={{ color: 'var(--gold)' }} />
+                                            {editIncomeId ? 'Editează Venit' : 'Venit Nou'}
+                                        </h2>
+                                        <button className="close-btn" onClick={() => setIsIncomeModalOpen(false)}>
+                                            <Icon name="X" />
+                                        </button>
+                                    </div>
+                                    <form onSubmit={handleAddIncome}>
+                                        <div className="form-group">
+                                            <label>Sursă Venit (Ex: Salariu, Comision, Vânzări)</label>
+                                            <input type="text" value={newIncomeSource} onChange={e => setNewIncomeSource(e.target.value)} placeholder="Ex: Salariu" required />
+                                        </div>
+                                        <div className="form-group" style={{ position: 'relative' }}>
+                                            <label>Suma (RON)</label>
+                                            <input type="number" step="0.01" value={newIncomeAmount} onChange={e => setNewIncomeAmount(e.target.value)} placeholder="0.00" style={{ fontSize: '24px', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }} required />
+                                            <span style={{ position: 'absolute', right: '16px', top: '38px', color: 'var(--gray)' }}>RON</span>
+                                        </div>
+                                        <button type="submit" className="btn-primary" style={{ width: '100%', padding: '16px', background: 'var(--gold)', color: '#000', fontWeight: 'bold', marginTop: '10px' }}>
+                                            {editIncomeId ? 'Salvează Modificările' : 'Adaugă Venit'}
                                         </button>
                                     </form>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Add Subscription Modal Overlay */}
-                    {isAddSubOpen && (
-                        <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setIsAddSubOpen(false) }}>
-                            <div className="modal-sheet">
-                                <div className="modal-header">
-                                    <h2 style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <Icon name="CalendarClock" style={{ color: 'var(--gold)' }} />
-                                        Abonament Nou
-                                    </h2>
-                                    <button className="close-btn" onClick={() => setIsAddSubOpen(false)}>
-                                        <Icon name="X" />
-                                    </button>
                                 </div>
-
-                                <form onSubmit={handleAddSub}>
-                                    <div className="form-group" style={{ position: 'relative' }}>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            placeholder="0.00"
-                                            value={newSubAmount}
-                                            onChange={e => setNewSubAmount(e.target.value)}
-                                            required
-                                            style={{ fontSize: '32px', fontWeight: '800', fontFamily: 'var(--font-mono)' }}
-                                            autoFocus
-                                        />
-                                    </div>
-
-                                    <div className="form-group" style={{ marginTop: '20px' }}>
-                                        <label>Nume Factură / Abonament</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ex: Netflix, Chirie, Rată Bancă..."
-                                            value={newSubName}
-                                            onChange={e => setNewSubName(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="form-group" style={{ marginTop: '24px' }}>
-                                        <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '18px' }}>
-                                            <Icon name="Check" />
-                                            Salvează Recurența
-                                        </button>
-                                    </div>
-                                </form>
                             </div>
-                        </div>
-                    )}
+                        )
+                    }
                 </div>
             );
         }
