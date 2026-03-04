@@ -1044,18 +1044,29 @@
             cursor: default;
         }
 
+        /* Modal Sheet — stays above keyboard on mobile */
         .modal-sheet {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
             width: 100%;
             border-radius: 24px 24px 0 0;
-            padding: 24px;
+            padding: 20px 24px;
             padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
             animation: slideUp 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            max-height: 90vh;
+            max-height: 92vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            /* Keep modal above software keyboard on iOS/Android */
+            position: relative;
+        }
+
+        /* When keyboard is open, modal input stays visible */
+        @supports (height: env(keyboard-inset-height)) {
+            .modal-overlay {
+                padding-bottom: env(keyboard-inset-height, 0px);
+            }
         }
 
         .goal-card-premium {
@@ -1196,6 +1207,23 @@
 
         .toast-info {
             border-color: rgba(52, 152, 219, 0.4);
+        }
+
+        .toast-danger {
+            border-color: rgba(231, 76, 60, 0.5);
+            background: rgba(20, 5, 5, 0.97);
+        }
+
+        /* PIN screen toast — compact badge, no border-box stretch */
+        .pin-screen .toast {
+            position: static !important;
+            transform: none !important;
+            left: auto !important;
+            margin: 12px auto 0 auto;
+            max-width: 280px;
+            font-size: 13px;
+            border-radius: 24px;
+            padding: 8px 16px;
         }
 
         .toast-danger {
@@ -1563,6 +1591,22 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
+        }
+
+        /* FAB action button labels */
+        .fab-action-label {
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 700;
+            font-family: var(--font-head);
+            color: rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+            letter-spacing: 0.3px;
+            pointer-events: none;
         }
 
         .fab-overlay.show {
@@ -2190,6 +2234,7 @@
             const [newExpenseAmount, setNewExpenseAmount] = useState('');
             const [newExpenseCat, setNewExpenseCat] = useState('supermarket');
             const [newExpenseDate, setNewExpenseDate] = useState(''); // Allows past days
+            const [newExpenseNote, setNewExpenseNote] = useState(''); // Optional memo
 
             // Voice Input Logic
             const [isListening, setIsListening] = useState(false);
@@ -2935,7 +2980,6 @@
             if (isLocked || isSettingPin) {
                 return (
                     <div className="pin-screen">
-                        {toast && <div className={`toast toast-${toast.type}`} style={{ top: '40px' }}>{toast.message}</div>}
                         <Icon name={isSettingPin ? "ShieldPlus" : "Lock"} className="lucide-xl" style={{ color: 'var(--gold)', marginBottom: '24px', width: '48px', height: '48px' }} />
                         <h2 style={{ color: 'var(--white)', fontSize: '24px', fontWeight: 'bold' }}>Money Planner</h2>
                         <p style={{ color: 'var(--gray)', marginTop: '8px' }}>
@@ -2947,6 +2991,21 @@
                                 <div key={i} className={`pin-dot ${pinInput.length > i ? 'filled' : ''}`}></div>
                             ))}
                         </div>
+
+                        {/* Compact inline error badge — no fixed overlay */}
+                        {toast && (
+                            <div style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                background: toast.type === 'danger' ? 'rgba(231,76,60,0.15)' : 'rgba(52,152,219,0.12)',
+                                border: `1px solid ${toast.type === 'danger' ? 'rgba(231,76,60,0.4)' : 'rgba(52,152,219,0.3)'}`,
+                                color: toast.type === 'danger' ? '#ff6b6b' : 'var(--info)',
+                                padding: '8px 16px', borderRadius: '50px', fontSize: '13px', fontWeight: '600',
+                                margin: '0 auto', maxWidth: '280px', animation: 'fadeIn 0.3s ease'
+                            }}>
+                                <Icon name={toast.type === 'danger' ? 'AlertCircle' : 'Info'} style={{ width: '16px', height: '16px' }} />
+                                {toast.message}
+                            </div>
+                        )}
 
                         <div className="pin-pad">
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
@@ -3604,14 +3663,17 @@
                             </div>
                             <div className={`fab-menu ${isFabMenuOpen ? 'open' : ''}`}>
 
-                                <div className="fab-action action-transfer" onClick={() => { setIsFabMenuOpen(false); setTransferAmount(''); setSelectedGoalId(''); setIsTransferModalOpen(true); triggerHaptic([30]); }}>
+                                <div className="fab-action action-transfer" style={{ position: 'relative' }} onClick={() => { setIsFabMenuOpen(false); setTransferAmount(''); setSelectedGoalId(''); setIsTransferModalOpen(true); triggerHaptic([30]); }}>
                                     <Icon name="Target" className="lucide-sm" />
+                                    {isFabMenuOpen && <span className="fab-action-label">Obiectiv</span>}
                                 </div>
-                                <div className="fab-action action-expense" onClick={() => { setIsFabMenuOpen(false); setTransactionType('expense'); setIsExpenseModalOpen(true); triggerHaptic([30]); }}>
+                                <div className="fab-action action-expense" style={{ position: 'relative' }} onClick={() => { setIsFabMenuOpen(false); setTransactionType('expense'); setNewExpenseName(''); setNewExpenseAmount(''); setNewExpenseNote(''); setNewExpenseCat('supermarket'); setNewExpenseDate(''); setIsExpenseModalOpen(true); triggerHaptic([30]); }}>
                                     <Icon name="Minus" className="lucide-sm" />
+                                    {isFabMenuOpen && <span className="fab-action-label">Plată</span>}
                                 </div>
-                                <div className="fab-action action-income" onClick={() => { setIsFabMenuOpen(false); setEditIncomeId(null); setNewIncomeSource(''); setNewIncomeAmount(''); setIsIncomeModalOpen(true); triggerHaptic([30]); }}>
+                                <div className="fab-action action-income" style={{ position: 'relative' }} onClick={() => { setIsFabMenuOpen(false); setEditIncomeId(null); setNewIncomeSource(''); setNewIncomeAmount(''); setIsIncomeModalOpen(true); triggerHaptic([30]); }}>
                                     <Icon name="Plus" className="lucide-sm" />
+                                    {isFabMenuOpen && <span className="fab-action-label">Venit</span>}
                                 </div>
                             </div>
                         </div>
@@ -3791,7 +3853,29 @@
                                             />
                                         </div>
 
-                                        <div className="form-group" style={{ marginTop: '24px' }}>
+                                        <div className="form-group" style={{ marginTop: '16px' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Icon name="CalendarClock" style={{ width: '14px', height: '14px', color: 'var(--gold)' }} />
+                                                Termen Limită (Opțional)
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={newGoalDate}
+                                                onChange={e => setNewGoalDate(e.target.value)}
+                                                style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', color: 'var(--gray)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius)', width: '100%', fontFamily: 'var(--font-mono)', fontSize: '15px' }}
+                                            />
+                                            {newGoalDate && newGoalAmount && (
+                                                <p style={{ fontSize: '11px', color: 'var(--emerald)', marginTop: '6px' }}>
+                                                    💡 {(() => {
+                                                        const days = Math.max(1, Math.ceil((new Date(newGoalDate) - new Date()) / (1000 * 60 * 60 * 24)));
+                                                        const daily = (parseFloat(newGoalAmount) / days).toFixed(0);
+                                                        return `Trebuie să economisești ~${daily} RON/zi în ${days} zile`;
+                                                    })()}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="form-group" style={{ marginTop: '20px' }}>
                                             <button type="submit" className="btn-primary" style={{ width: '100%', padding: '16px', background: 'var(--gold)', color: 'var(--bg-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                                 <Icon name="Check" className="lucide-sm" />
                                                 Setează Obiectivul
